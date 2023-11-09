@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Village
 from django.urls import reverse_lazy
+from .forms import UserRegisterForm
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
 class UserLoginView(LoginView):
     # ... twoja konfiguracja klasy ...
     success_url = reverse_lazy('plemiona:plemiona')  # Użyj przestrzeni nazw 'plemiona' # ścieżka do Twojego szablonu logowania
@@ -33,5 +36,14 @@ def get_user_village(request):
 # w pliku views.py twojej aplikacji
 
 
-
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('plemiona:get_user_village')  # Zmień na odpowiedni URL
+    else:
+        form = UserRegisterForm()
+    return render(request, 'plemiona/register.html', {'form': form})
 

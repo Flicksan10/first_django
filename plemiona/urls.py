@@ -8,11 +8,12 @@ app_name = "plemiona"
 # urlpatterns = [
 #     path('', village_list, name='village_list'),
 # ]
-from .views import get_user_village,UserLoginView
+from .views import get_user_village,UserLoginView,register
 
 urlpatterns = [
     path('login/', views.UserLoginView.as_view(), name='login'),
     path('village/', get_user_village, name='get_user_village'),
+    path('register/', register, name='register'),
 ]
 # #
 # urlpatterns = [
