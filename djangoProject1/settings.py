@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-hg!)__s7u@5nd*tdug2)da&1gi&ha+qgapjq8a7liifp6kv@hk
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+# Redirection after logout
+LOGOUT_REDIRECT_URL = '/plemiona/login'
+# redirection after login
 LOGIN_REDIRECT_URL = '/plemiona/village'
 # Application definition
 

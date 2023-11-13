@@ -11,6 +11,18 @@ class Village(models.Model):
     barracks = models.IntegerField(default=0)
     pikemen = models.IntegerField(default=0)
     halberdiers = models.IntegerField(default=0)
+    archer = models.IntegerField(default=0)
+    axeman = models.IntegerField(default=0)
+    wood = models.IntegerField(default=1000)
+    iron = models.IntegerField(default=1000)
+    clay = models.IntegerField(default=1000)
+    granary = models.IntegerField(default=5000)
+    farm = models.IntegerField(default=500)
+    sawmill = models.IntegerField(default=1)
+    iron_mine = models.IntegerField(default=1)
+    clay_pit = models.IntegerField(default=1)
+
+
 
     def __str__(self):
         return self.village_name

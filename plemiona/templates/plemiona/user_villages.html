@@ -1,0 +1,58 @@
+{% block content %}
+    <link rel="stylesheet" href="style.css">
+    <h2>Twoje wioski</h2>
+    {% if villages %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Użytkownik</th>
+                    <th>Nazwa Wioski</th>
+                    <th>Koordynaty X</th>
+                    <th>Koordynaty Y</th>
+                    <th>Ratusz</th>
+                    <th>Koszary</th>
+                    <th>Pikinierzy</th>
+                    <th>Halabardnicy</th>
+                    <th>Łucznik</th>
+                    <th>Topornik</th>
+                    <th>Drewno</th>
+                    <th>Żelazo</th>
+                    <th>Glina</th>
+                    <th>Spichlerz</th>
+                    <th>Zagroda</th>
+                    <th>Tartak</th>
+                    <th>Kopalnia Żelaza</th>
+                    <th>Kopalnia Gliny</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for village in villages %}
+                    <tr>
+                        <td>{{ village.user }}</td>
+                        <td>{{ village.village_name }}</td>
+                        <td>{{ village.coordinate_x }}</td>
+                        <td>{{ village.coordinate_y }}</td>
+                        <td>{{ village.town_hall }}</td>
+                        <td>{{ village.barracks }}</td>
+                        <td>{{ village.pikemen }}</td>
+                        <td>{{ village.halberdiers }}</td>
+                        <td>{{ village.archer }}</td>
+                        <td>{{ village.axeman }}</td>
+                        <td>{{ village.wood }}</td>
+                        <td>{{ village.iron }}</td>
+                        <td>{{ village.clay }}</td>
+                        <td>{{ village.granary }}</td>
+                        <td>{{ village.farm }}</td>
+                        <td>{{ village.sawmill }}</td>
+                        <td>{{ village.iron_mine }}</td>
+                        <td>{{ village.clay_pit }}</td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nie masz jeszcze żadnych wiosek.</p>
+    {% endif %}
+{% endblock %}

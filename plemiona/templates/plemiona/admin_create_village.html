@@ -1,0 +1,18 @@
+<!-- plemiona/templates/plemiona/admin_create_village.html -->
+{#{% extends 'plemiona/base.html' %}#}
+
+{% block content %}
+  <h2>Stwórz nową wioskę dla użytkownika</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label for="user_id">Wybierz użytkownika:</label>
+    <select id="user_id" name="user_id">
+      {% for user in users %}
+        <option value="{{ user.id }}">{{ user.username }}</option>
+      {% endfor %}
+    </select>
+    <label for="village_name">Nazwa wioski:</label>
+    <input type="text" id="village_name" name="village_name">
+    <button type="submit">Stwórz wioskę</button>
+  </form>
+{% endblock %}
