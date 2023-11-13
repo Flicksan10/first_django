@@ -107,3 +107,27 @@ def create_village_for_user(username):
     except IntegrityError:
         # W przypadku, gdyby doszło do kolizji koordynatów pomimo sprawdzenia
         return None
+
+
+# Tworzenie mapy do gry
+
+from django.shortcuts import render
+from .models import Village
+
+from django.shortcuts import get_object_or_404, render
+from .models import Village
+
+def village_detail(request, village_id):
+    village = get_object_or_404(Village, id=village_id)
+    return render(request, 'plemiona/village_detail.html', {'village': village})
+
+def map_view(request):
+    map_size = 10
+    game_map = [[" " for _ in range(map_size)] for _ in range(map_size)]
+
+    villages = Village.objects.all()
+    for village in villages:
+        if 0 <= village.coordinate_x < map_size and 0 <= village.coordinate_y < map_size:
+            game_map[village.coordinate_y][village.coordinate_x] = village
+
+    return render(request, 'plemiona/map.html', {'game_map': game_map})

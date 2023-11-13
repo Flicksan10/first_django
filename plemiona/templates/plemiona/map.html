@@ -1,0 +1,32 @@
+{% block content %}
+<style>
+    .map-table {
+        border-collapse: collapse;
+    }
+    .map-table td {
+        width: 20px;
+        height: 20px;
+        text-align: center;
+        border: 1px solid black;
+        background-color: black;
+        color: white;
+    }
+    .village {
+        background-color: blue;
+    }
+</style>
+
+<table class="map-table">
+    {% for row in game_map %}
+    <tr>
+        {% for cell in row %}
+            <td class="{% if cell != ' ' %}village{% endif %}">
+                {% if cell != ' ' %}
+                    <a href="{% url 'village_detail' cell.id %}">X</a>
+                {% endif %}
+            </td>
+        {% endfor %}
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}
