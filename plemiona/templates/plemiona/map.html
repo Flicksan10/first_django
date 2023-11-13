@@ -22,7 +22,7 @@
         {% for cell in row %}
             <td class="{% if cell != ' ' %}village{% endif %}">
                 {% if cell != ' ' %}
-                    <a href="{% url 'village_detail' cell.id %}">X</a>
+                    <a href="{% url 'plemiona:village_detail' cell.id %}">X</a>
                 {% endif %}
             </td>
         {% endfor %}

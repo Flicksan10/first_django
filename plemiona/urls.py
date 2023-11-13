@@ -14,11 +14,11 @@ from .views import get_user_village, UserLoginView, register, create_village_for
 urlpatterns = [
     path('admin/create_village/', views.admin_create_village, name='admin_create_village'),
     path('login/', views.UserLoginView.as_view(), name='login'),
-    path('village/', get_user_village, name='get_user_village'),
+    path('village/', views.get_user_village, name='get_user_village'),
     path('register/', register, name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('map', views.map_view, name='map_view'),
-    path('village/<int:village_id>/', views.village_detail, name='village_detail'),
+    path('village_detail/<int:village_id>/', views.village_detail, name='village_detail'),
     path('add_village/<str:username>/', create_village_for_user, name='create_village_for_user'),
 ]
 # #
