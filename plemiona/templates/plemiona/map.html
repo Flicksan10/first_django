@@ -22,7 +22,11 @@
         {% for cell in row %}
             <td class="{% if cell != ' ' %}village{% endif %}">
                 {% if cell != ' ' %}
-                    <a href="{% url 'plemiona:village_detail' cell.id %}">X</a>
+                    {% if cell.user == request.user %}
+                        <a href="{% url 'plemiona:village_detail' cell.id %}">M</a>
+                    {% else %}
+                        <a href="{% url 'plemiona:village_detail' cell.id %}">X</a>
+                    {% endif %}
                 {% endif %}
             </td>
         {% endfor %}
