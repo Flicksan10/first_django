@@ -32,7 +32,10 @@ LOGOUT_REDIRECT_URL = '/plemiona/login'
 LOGIN_REDIRECT_URL = '/plemiona/village'
 # Application definition
 
+CELERY_BROKER_URL = 'amqp://localhost'
+
 INSTALLED_APPS = [
+    'django_celery_beat',
     "polls.apps.PollsConfig",
     "plemiona.apps.PlemionaConfig",
     'django.contrib.admin',
@@ -40,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
