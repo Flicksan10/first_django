@@ -39,3 +39,16 @@ iron_mine_data = [
     {"lvl": 9, "wood": 453, "clay": 454, "iron": 391, "people_needed": 5, "total_population": 35, "performance": 50},
     {"lvl": 10, "wood": 567, "clay": 579, "iron": 485, "people_needed": 6, "total_population": 41, "performance": 58}
 ]
+
+town_hall = [
+    {"lvl": 1, "wood": 90, "clay": 80, "iron": 70, "people_needed": 5, "total_population": 5, "build_time": 95},
+    {"lvl": 2, "wood": 113, "clay": 102, "iron": 88, "people_needed": 1, "total_population": 6, "build_time": 91},
+    {"lvl": 3, "wood": 143, "clay": 130, "iron": 111, "people_needed": 1, "total_population": 7, "build_time": 86},
+    {"lvl": 4, "wood": 180, "clay": 166, "iron": 140, "people_needed": 1, "total_population": 8, "build_time": 82},
+    {"lvl": 5, "wood": 227, "clay": 211, "iron": 176, "people_needed": 1, "total_population": 9, "build_time": 78},
+    {"lvl": 6, "wood": 286, "clay": 270, "iron": 222, "people_needed": 2, "total_population": 11, "build_time": 75},
+    {"lvl": 7, "wood": 360, "clay": 344, "iron": 280, "people_needed": 2, "total_population": 13, "build_time": 71},
+    {"lvl": 8, "wood": 454, "clay": 438, "iron": 353, "people_needed": 2, "total_population": 15, "build_time": 68},
+    {"lvl": 9, "wood": 572, "clay": 559, "iron": 445, "people_needed": 3, "total_population": 18, "build_time": 64},
+    {"lvl": 10, "wood": 720, "clay": 712, "iron": 560, "people_needed": 3, "total_population": 21, "build_time": 61}
+]

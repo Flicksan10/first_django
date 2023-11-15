@@ -3,6 +3,7 @@
 
 {% block content %}
   <h2>Stwórz nową wioskę dla użytkownika</h2>
+    <h3>{{ infos }}</h3>
   <form method="post">
     {% csrf_token %}
     <label for="user_id">Wybierz użytkownika:</label>

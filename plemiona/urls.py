@@ -20,6 +20,10 @@ urlpatterns = [
     path('map', views.map_view, name='map_view'),
     path('village_detail/<int:village_id>/', views.village_detail, name='village_detail'),
     path('add_village/<str:username>/', create_village_for_user, name='create_village_for_user'),
+    # path('town_hall/',views.town_hall_view, name='town_hall'),
+    path('town_hall/<int:village_id>/', views.town_hall_view, name='town_hall_view'),
+    path('upgrade_building/<str:building>/', views.upgrade_building, name='upgrade_building'),
+
 ]
 # #
 # urlpatterns = [

@@ -1,6 +1,8 @@
 {% block content %}
 
     {% if village.user == request.user %}
+        <h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
+
         <h2>Twoja Wioska</h2>
         <h3>Nazwa: {{ village.village_name }}</h3>
         <p>Koordynaty: ({{ village.coordinate_x }}, {{ village.coordinate_y }})</p>
@@ -9,7 +11,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Ratusz</th>
+                    <th><a href="{% url 'plemiona:town_hall_view' village.id %}">Ratusz</a></th>
                     <th>Koszary</th>
                     <th>Pikinierzy</th>
                     <th>Halabardnicy</th>

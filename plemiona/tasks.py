@@ -7,7 +7,7 @@ from .models import Village
 # @shared_task
 @app.task
 def update_resources():
-    print("działam")
+    print("dziam")
     villages = Village.objects.all()
     for village in villages:
         # Zakładając, że masz funkcję do pobierania wydajności na podstawie poziomu
@@ -18,18 +18,18 @@ def update_resources():
         village.wood += wood_increase
         village.clay += clay_increase
         village.iron += iron_increase
-        print(village.wood)
+        # print(village.wood)
         village.save()
 
-def get_performance(level, building_type, sawmill_data, clay_pit_data, iron_mine_data):
+def get_performance(level, building_type, resource_data):
     level -= 1  # Dostosowanie poziomu indeksowanie rozpoczyna się od 0
 
     if building_type == 'sawmill':
-        data = sawmill_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 6
     elif building_type == 'clay_pit':
-        data = clay_pit_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 6
     elif building_type == 'iron_mine':
-        data = iron_mine_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 6
     else:
         raise ValueError("Nieznany typ budynku")
 

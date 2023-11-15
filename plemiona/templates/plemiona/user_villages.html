@@ -23,6 +23,7 @@
                     <th>Tartak</th>
                     <th>Kopalnia Żelaza</th>
                     <th>Kopalnia Gliny</th>
+                    <th>przejdz do wiochy</th>
 
                 </tr>
             </thead>
@@ -47,6 +48,7 @@
                         <td>{{ village.sawmill }}</td>
                         <td>{{ village.iron_mine }}</td>
                         <td>{{ village.clay_pit }}</td>
+                        <td> <a href="{% url 'plemiona:village_detail' village.id %}">wybierz</a></td>
 
                     </tr>
                 {% endfor %}
