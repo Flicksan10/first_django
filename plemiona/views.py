@@ -139,4 +139,5 @@ def town_hall_view(request, village_id):
 def upgrade_building(request, building):
     # Logika rozbudowy budynku
     # ...
+    print("policja")
     return redirect('town_hall')  # Przekieruj z powrotem do widoku town_hall

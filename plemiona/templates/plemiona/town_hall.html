@@ -1,13 +1,16 @@
-{% extends 'base.html' %}
 {% block content %}
-  <h2>Ratusz</h2>
-  <ul>
-    <li>Ratusz: Poziom {{ village.town_hall }}r<a href="{% url 'upgrade_building' building='town_hall' %}">Rozbuduj</a></li>
-{#    <li>Koszary: Poziom {{ village.barracks }} <a href="{% url 'upgrade_building' building='barracks' %}">Rozbuduj</a></li>#}
-{#    <li>Spichlerz: Poziom {{ village.granary }} <a href="{% url 'upgrade_building' building='granary' %}">Rozbuduj</a></li>#}
-{#    <li>Farma: Poziom {{ village.farm }} <a href="{% url 'upgrade_building' building='farm' %}">Rozbuduj</a></li>#}
-    <li>Tartak: Poziom {{ village.sawmill }} <a href="{% url 'upgrade_building' building='sawmill' %}">Rozbuduj</a></li>
-    <li>Kopalnia żelaza: Poziom {{ village.iron_mine }} <a href="{% url 'upgrade_building' building='iron_mine' %}">Rozbuduj</a></li>
-    <li>Kopalnia gliny: Poziom {{ village.clay_pit }} <a href="{% url 'upgrade_building' building='clay_pit' %}">Rozbuduj</a></li>
-  </ul>
+    <h2>Ratusz</h2>
+    <ul>
+        <li>Ratusz: Poziom {{ village.town_hall }}r<a
+                href="{% url 'plemiona:upgrade_building' building='town_hall' %}">Rozbuduj</a></li>
+        {#    <li>Koszary: Poziom {{ village.barracks }} <a href="{% url 'upgrade_building' building='barracks' %}">Rozbuduj</a></li>#}
+        {#    <li>Spichlerz: Poziom {{ village.granary }} <a href="{% url 'upgrade_building' building='granary' %}">Rozbuduj</a></li>#}
+        {#    <li>Farma: Poziom {{ village.farm }} <a href="{% url 'upgrade_building' building='farm' %}">Rozbuduj</a></li>#}
+        <li>Tartak: Poziom {{ village.sawmill }} <a href="{% url 'plemiona:upgrade_building' building='sawmill' %}">Rozbuduj</a>
+        </li>
+        <li>Kopalnia żelaza: Poziom {{ village.iron_mine }} <a href="{% url 'plemiona:upgrade_building' building='iron_mine' %}">Rozbuduj</a>
+        </li>
+        <li>Kopalnia gliny: Poziom {{ village.clay_pit }} <a href="{% url 'plemiona:upgrade_building' building='clay_pit' %}">Rozbuduj</a>
+        </li>
+    </ul>
 {% endblock %}
