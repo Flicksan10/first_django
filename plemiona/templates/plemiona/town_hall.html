@@ -1,16 +1,26 @@
-{% block content %}
-    <h2>Ratusz</h2>
-    <ul>
-        <li>Ratusz: Poziom {{ village.town_hall }}r<a
-                href="{% url 'plemiona:upgrade_building' building='town_hall' %}">Rozbuduj</a></li>
-        {#    <li>Koszary: Poziom {{ village.barracks }} <a href="{% url 'upgrade_building' building='barracks' %}">Rozbuduj</a></li>#}
-        {#    <li>Spichlerz: Poziom {{ village.granary }} <a href="{% url 'upgrade_building' building='granary' %}">Rozbuduj</a></li>#}
-        {#    <li>Farma: Poziom {{ village.farm }} <a href="{% url 'upgrade_building' building='farm' %}">Rozbuduj</a></li>#}
-        <li>Tartak: Poziom {{ village.sawmill }} <a href="{% url 'plemiona:upgrade_building' building='sawmill' %}">Rozbuduj</a>
-        </li>
-        <li>Kopalnia żelaza: Poziom {{ village.iron_mine }} <a href="{% url 'plemiona:upgrade_building' building='iron_mine' %}">Rozbuduj</a>
-        </li>
-        <li>Kopalnia gliny: Poziom {{ village.clay_pit }} <a href="{% url 'plemiona:upgrade_building' building='clay_pit' %}">Rozbuduj</a>
-        </li>
-    </ul>
-{% endblock %}
+
+
+{% load custom_filters  %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
+<h3><a href="{% url 'plemiona:village_detail' village.id %}">powrót do wioski</a></h3>
+<h2>Twoja Wioska</h2>
+<h3>Nazwa: {{ village.village_name }}</h3>
+<p>Koordynaty: ({{ village.coordinate_x }}, {{ village.coordinate_y }})</p>
+<p>surowce: ({{ village.wood }}, {{ village.clay }}, {{ village.iron }})</p>
+{% for building, data in next_levels.items %}
+  <h2>{{ building|capfirst }}</h2>
+  {% if data %}
+    <p>Aktualny poziom: {{ village|get_attribute:building }}</p>
+    <p>Wymagania do następnego poziomu: Drewno: {{ data.wood }}, Glina: {{ data.clay }}, Żelazo: {{ data.iron }}</p>
+        {% if missing_resources %}
+    <p class="missing-resources"> Brakuje: {{ missing_resources|join:", " }}</p>
+        {% endif %}
+    <p><a href="{% url 'plemiona:upgrade_building' village.id building %}">Rozbudowa</a></p>
+  {% else %}
+    <p>Maksymalny poziom osiągnięty.</p>
+  {% endif %}
+{% endfor %}
+
+

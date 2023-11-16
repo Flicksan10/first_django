@@ -8,7 +8,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
 
-from .buildings_data import town_hall
+from .buildings_data import buildings
 from .forms import UserLoginForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -124,20 +124,74 @@ def map_view(request):
 
 # ratusz z opcjami z rozbudowa itd
 def town_hall_view(request, village_id):
-    # Użyj village_id do pobrania konkretnej wioski
-    village = Village.objects.get(id=village_id)
-
-    current_town_hall_data = next((item for item in town_hall if item["lvl"] == village.town_hall), None)
+    village = Village.objects.get(id=village_id, user=request.user)
+    missing_resources = []
+    next_levels = {}
+    building_levels = {}
+    for building in buildings:
+        current_level = getattr(village, building)
+        next_level_data = next((item for item in buildings[building] if item["lvl"] == current_level + 1), None)
+        next_levels[building] = next_level_data
+        building_levels[building] = current_level
+    print("dane")
+    print(next_levels)
+    print(building_levels)
+    missing_resources = request.session.pop('missing_resources', None)
     context = {
         'village': village,
-        'buildings_data': current_town_hall_data
+        'next_levels': next_levels,
+        'building_levels': building_levels,
+        'missing_resources': missing_resources
     }
-    print("halo")
     return render(request, 'plemiona/town_hall.html', context)
 
 
-def upgrade_building(request, building):
-    # Logika rozbudowy budynku
-    # ...
-    print("policja")
-    return redirect('town_hall')  # Przekieruj z powrotem do widoku town_hall
+# napisz mi funkcje, która będzie rozbudowywała budynek pobierała z tabeli village poziom np tartaku i sprawdzała z danych w buildings_data.py ile
+# kosztuje wyższy poziom i pobierze to z village i rozbuduje o 1 budynek
+
+
+
+def upgrade_building(request, village_id, building_type):
+    # Pobierz wioskę
+    village = get_object_or_404(Village, id=village_id, user=request.user)
+
+    # Pobierz obecny poziom budynku
+    current_level = getattr(village, building_type)
+
+    # Pobierz dane budynku dla następnego poziomu
+    building_data = buildings[building_type]
+    next_level_data = next((item for item in building_data if item["lvl"] == current_level + 1), None)
+
+    if not next_level_data:
+        # Przekieruj z powrotem do town_hall z komunikatem o błędzie
+        return redirect('plemiona:town_hall_view', village_id=village_id)
+
+    # Sprawdź, czy wioska ma wystarczające zasoby
+    if (
+            village.wood >= next_level_data["wood"]
+            and village.clay >= next_level_data["clay"]
+            and village.iron >= next_level_data["iron"]):
+        # Odejmij zasoby i zwiększ poziom budynku
+        village.wood -= next_level_data["wood"]
+        village.clay -= next_level_data["clay"]
+        village.iron -= next_level_data["iron"]
+        setattr(village, building_type, current_level + 1)
+        village.save()
+        # Przekieruj z powrotem do town_hall z komunikatem o sukcesie
+        return redirect('plemiona:town_hall_view', village_id=village_id)
+    else:
+        # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
+        missing_resources = []
+        if village.wood < next_level_data['wood']:
+            missing_resources.append('drewno')
+        if village.clay < next_level_data['clay']:
+            missing_resources.append('glina')
+        if village.iron < next_level_data['iron']:
+            missing_resources.append('żelazo')
+
+        if missing_resources:
+
+            request.session['missing_resources'] = missing_resources
+            return redirect('plemiona:town_hall_view', village_id=village_id)
+
+#

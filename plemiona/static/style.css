@@ -20,3 +20,9 @@ tr:nth-child(even) {
 tr:hover {
   background-color: #ddd;
 }
+
+
+  .missing-resources {
+    color: red;
+    font-weight: bold;
+  }

@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from djangoProject1.celery import app
-from .buildings_data import sawmill_data, clay_pit_data, iron_mine_data
+from .buildings_data import buildings
 from .models import Village
 
 # @shared_task
@@ -11,9 +11,9 @@ def update_resources():
     villages = Village.objects.all()
     for village in villages:
         # Zakładając, że masz funkcję do pobierania wydajności na podstawie poziomu
-        wood_increase = get_performance(village.sawmill, 'sawmill',sawmill_data)
-        clay_increase = get_performance(village.clay_pit, 'clay_pit',clay_pit_data)
-        iron_increase = get_performance(village.iron_mine, 'iron_mine',iron_mine_data)
+        wood_increase = get_performance(village.sawmill, 'sawmill',buildings['sawmill'])
+        clay_increase = get_performance(village.clay_pit, 'clay_pit',buildings['clay_pit'])
+        iron_increase = get_performance(village.iron_mine, 'iron_mine',buildings['iron_mine'])
 
         village.wood += wood_increase
         village.clay += clay_increase
