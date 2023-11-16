@@ -1,0 +1,47 @@
+{% load village_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Django App</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header>
+        <!-- Your common header content -->
+    </header>
+
+    {% if request.session.active_village %}
+        {% with active_village_id=request.session.active_village %}
+            {% get_active_village request as active_village %}
+            <table>
+                <tr>
+                    <th>Nazwa Wioski</th>
+                    <th>Koordynaty</th>
+                    <th>Drewno</th>
+                    <th>Glina</th>
+                    <th>Żelazo</th>
+                    <th>Liczba mieszkańców</th>
+                    <!-- Możesz dodać więcej kolumn zgodnie z potrzebami -->
+                </tr>
+                <tr>
+                    <td>{{ active_village.village_name }}</td>
+                    <td>({{ active_village.coordinate_x }}, {{ active_village.coordinate_y }})</td>
+                    <td>{{ active_village.wood }}</td>
+                    <td>{{ active_village.clay }}</td>
+                    <td>{{ active_village.iron }}</td>
+                    <td>{{ active_village.population }}</td>
+                    <!-- Dodaj więcej danych zgodnie z potrzebami -->
+                </tr>
+            </table>
+        {% endwith %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+
+    <footer>
+        <!-- Your common footer content -->
+    </footer>
+</body>
+</html>

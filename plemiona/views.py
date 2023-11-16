@@ -46,6 +46,14 @@ def admin_create_village(request):
 @login_required
 def get_user_village(request):
     user_villages = Village.objects.filter(user=request.user)
+    if not request.session.get('active_village'):
+        user_villages = Village.objects.filter(user=request.user)
+        if user_villages.exists():
+            request.session['active_village'] = user_villages.first().id
+
+            request.session['active_village_full']  = 7
+    print(request.session.get('active_village'))
+    print(request.session.get('active_village_full'))
     return render(request, 'plemiona/user_villages.html', {'villages': user_villages})
 
 # w pliku views.py twojej aplikacji
@@ -107,20 +115,39 @@ from django.shortcuts import get_object_or_404, render
 from .models import Village
 
 def village_detail(request, village_id):
-    print("eeasd")
     village = get_object_or_404(Village, id=village_id)
+
+    # Sprawdź, czy wioska należy do zalogowanego użytkownika
+    if village.user == request.user:
+        # Ustaw tę wioskę jako aktywną w sesji
+        request.session['active_village'] = village.id
+    else:
+        # Jeśli wioska nie należy do użytkownika, nie zmieniaj active_village
+        pass
     return render(request, 'plemiona/village_detail.html', {'village': village})
 
 def map_view(request):
-    map_size = 10
+    active_village_id = request.session.get('active_village')
+    if active_village_id:
+        active_village = Village.objects.get(id=active_village_id)
+        # Użyj active_village do czegoś
+    else:
+        #TODO ale sie nie powinno zdarzyć
+    # Obsługa przypadku, gdy aktywna wioska nie jest ustawiona
+        user_villages = Village.objects.filter(user=request.user)
+    map_size = 11
     game_map = [[" " for _ in range(map_size)] for _ in range(map_size)]
 
     villages = Village.objects.all()
     for village in villages:
         if 0 <= village.coordinate_x < map_size and 0 <= village.coordinate_y < map_size:
             game_map[village.coordinate_y][village.coordinate_x] = village
-
-    return render(request, 'plemiona/map.html', {'game_map': game_map})
+    print(game_map)
+    context = {
+        'game_map': game_map,  # Załóżmy, że game_map to twoja mapa gry
+        'active_village_id': active_village_id
+    }
+    return render(request, 'plemiona/map.html', context)
 
 # ratusz z opcjami z rozbudowa itd
 def town_hall_view(request, village_id):
