@@ -1,11 +1,14 @@
-<!-- w pliku login.html -->
-
+{#{% extends "base_generic.html" %}#}
 
 {% block content %}
-  <h2>Login</h2>
+    {% static %}
+    <p>chuj</p>
+  <!-- Tutaj możesz dodać swoją grafikę -->
+  <img src="{% static 'images/dera_login.jpg' %}" alt="Grafika">
+
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Login</button>
+    <button type="submit">Zaloguj się</button>
   </form>
 {% endblock %}

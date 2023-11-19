@@ -8,7 +8,9 @@
 </head>
 <body>
     <header>
-        <!-- Your common header content -->
+        <p><a href="{% url 'plemiona:logout' %}">Wyloguj się </a></p>
+        <p> <a href="{% url 'plemiona:map_view' %}">MAPA </a></p>
+        <p> <a href="{% url 'plemiona:get_user_village' %}">Wszystkie wioski </a></p>
     </header>
 
     {% if request.session.active_village %}

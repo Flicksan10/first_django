@@ -1,11 +1,25 @@
-<!-- w pliku login.html -->
-
-
+{% load static %}
 {% block content %}
-  <h2>Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+    <p><a href="{% url 'plemiona:register'%}">Rejestracja</a></p>
+<div class="outer-container">
+    <div class="inner-container">
+        <form method="post">
+            {% csrf_token %}
+            <div id="username-field" class="login-form_user_pass">{{ form.username }}</div>
+            <div id="password-field" class="login-form_user_pass">{{ form.password }}</div>
+            <div id="submit-button"><button type="submit"></button></div>
+        </form>
+    </div>
+
+</div>
+
 {% endblock %}
+</body>
+</html>

@@ -9,11 +9,11 @@ app_name = "plemiona"
 # urlpatterns = [
 #     path('', village_list, name='village_list'),
 # ]
-from .views import get_user_village, UserLoginView, register, create_village_for_user
+from .views import get_user_village, register, create_village_for_user, CustomLoginView
 
 urlpatterns = [
     path('admin/create_village/', views.admin_create_village, name='admin_create_village'),
-    path('login/', views.UserLoginView.as_view(), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('village/', views.get_user_village, name='get_user_village'),
     path('register/', register, name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),

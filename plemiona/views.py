@@ -9,7 +9,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
 
 from .buildings_data import buildings
-from .forms import UserLoginForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -20,14 +19,16 @@ from django.contrib.auth import login
 from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
-
+from .forms import CustomLoginForm
 from .tasks import update_resources
 
 
-class UserLoginView(LoginView):
-    # ... twoja konfiguracja klasy ...
-    success_url = reverse_lazy('plemiona:plemiona')  # Użyj przestrzeni nazw 'plemiona' # ścieżka do Twojego szablonu logowania
-
+# class UserLoginView(LoginView):
+#     # ... twoja konfiguracja klasy ...
+#     success_url = reverse_lazy('plemiona:plemiona')  # Użyj przestrzeni nazw 'plemiona' # ścieżka do Twojego szablonu logowania
+class CustomLoginView(LoginView):
+    form_class = CustomLoginForm
+    template_name = 'plemiona/login.html'
 
 @staff_member_required
 def admin_create_village(request):
