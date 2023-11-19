@@ -212,3 +212,97 @@ tr:hover {
 /*   width: 360px;  !* Szerokość przycisku *!*/
 /*    height: 40px;*/
 /*}*/
+
+.resource-icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle; /* Aby obraz był wyrównany z tekstem */
+}
+
+/*.map-table img {*/
+/*    width: 60px; !* lub inny pożądany rozmiar *!*/
+/*    height: 60px;*/
+/*}*/
+
+/*.map-table {*/
+/*    border-collapse: collapse; !* Usuwa odstępy między komórkami *!*/
+/*    width: 100%; !* Opcjonalnie, aby tabela zajmowała całą dostępną szerokość *!*/
+/*}*/
+
+/*.map-table td {*/
+/*    width: 60px; !* lub inny pożądany rozmiar *!*/
+/*    height: 60px;*/
+/*    padding: 0; !* Usuwa wewnętrzne odstępy komórek *!*/
+/*    margin:  0;*/
+/*}*/
+
+/*.map-icon {*/
+/*    display: block; !* Usuwa domyślny margines dolny obrazków *!*/
+/*    width: 100%; !* Szerokość obrazka dopasowana do szerokości komórki *!*/
+/*    height: auto; !* Wysokość obrazka zachowuje proporcje *!*/
+/*}*/
+/*.map-container {*/
+/*    width: 1000px;*/
+/*    height: 1000px;*/
+/*    overflow: auto; !* Włącza przewijanie, jeśli zawartość jest większa niż kontener *!*/
+/*    border: 1px solid #ccc; !* Opcjonalna ramka dla lepszej widoczności *!*/
+/*    position: relative; !* Pozycjonowanie względne dla kontenera *!*/
+/*}*/
+
+.map-table {
+    border-collapse: collapse; /* Usuwa odstępy między komórkami */
+    width: auto; /* Pozwala na dopasowanie szerokości tabeli do zawartości */
+}
+
+.map-table td {
+    width: 50px; /* Ustawia szerokość komórki na 50px */
+    height: 50px; /* Ustawia wysokość komórki na 50px */
+    padding: 0; /* Usuwa wewnętrzne odstępy komórek */
+    margin: 0; /* Usuwa zewnętrzne marginesy komórek */
+    border: 0; /* Usuwa ramki komórek */
+}
+.map-icon {
+    display: block; /* Usuwa domyślny margines dolny obrazków */
+    width: 50px; /* Szerokość obrazka ustawiona na 50px */
+    height: 50px; /* Wysokość obrazka ustawiona na 50px */
+}
+
+.image-container {
+    position: relative; /* Ustawia kontener jako punkt odniesienia dla pozycjonowania absolutnego */
+    width: 50px; /* Ustaw szerokość kontenera */
+    height: 50px; /* Ustaw wysokość kontenera */
+}
+
+.background-image, .foreground-image {
+    position: absolute; /* Pozycjonowanie absolutne względem kontenera */
+    top: 0; /* Ustawia obrazek na górze kontenera */
+    left: 0; /* Ustawia obrazek na lewej stronie kontenera */
+    width: 100%; /* Rozciąga obrazek na całą szerokość kontenera */
+    height: 100%; /* Rozciąga obrazek na całą wysokość kontenera */
+}
+.foreground-image {
+    width: 80%; /* Rozciąga obrazek na całą szerokość kontenera */
+    height: 80%; /
+}
+.foreground-image2 {
+    position: absolute;
+    top: -0; /* Ustawia obrazek na górze kontenera */
+    left: -0;
+
+    width: 10px;
+    height: 10px;
+}
+
+/*.background-image {*/
+/*    position: absolute;*/
+/*       width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
+/*    height: 50px; !* Wysokość obrazka ustawiona na 50px *!*/
+/*}*/
+
+/*.foreground-image {*/
+/*    position: absolute; !* Pozycjonowanie absolutne względem kontenera *!*/
+/*    top: 0; !* Ustawia obrazek na górze kontenera *!*/
+/*    left: 0; !* Ustawia obrazek na lewej stronie kontenera *!*/
+/*     width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
+/*    height: 50px; !* Wysokość obrazka ustawiona na 50px *!*/
+/*}*/

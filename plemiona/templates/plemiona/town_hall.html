@@ -18,9 +18,9 @@
     <tr>
       <th>Budynek</th>
       <th>Aktualny Poziom</th>
-      <th>Drewno</th>
-      <th>Glina</th>
-      <th>Żelazo</th>
+      <th><img src="{% static 'images/wood.jpg' %}" alt="Drewno"  class="resource-icon"> Drewno {{ data.wood }}</th>
+      <th>  <img src="{% static 'images/clay.jpg' %}" alt="Glina" class="resource-icon"> Glina {{ data.clay }}</th>
+      <th><img src="{% static 'images/iron.jpg' %}" alt="Żelazo" class="resource-icon"> Żelazo {{ data.iron }}</th>
       <th>Akcja</th>
     </tr>
   </thead>
