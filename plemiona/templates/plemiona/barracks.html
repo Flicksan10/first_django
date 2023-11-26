@@ -1,0 +1,44 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+{% load custom_filters %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<h3>{{ village.village_name }}</h3>
+{% if missing_resources_units %}
+  <div class="missing-resources">
+    <strong>Brakuje:</strong> {{ missing_resources_units|join:", " }}
+  </div>
+{% endif %}
+
+<form action="{% url 'plemiona:recruit_units' village.id %}" method="post">
+  {% csrf_token %}
+  <table>
+    <thead>
+      <tr>
+        <th>Jednostka</th>
+        <th>Aktualna Liczba</th>
+        <th><img src="{% static 'images/wood.jpg' %}" alt="Drewno" class="resource-icon"> Drewno</th>
+        <th><img src="{% static 'images/clay.jpg' %}" alt="Glina" class="resource-icon"> Glina</th>
+        <th><img src="{% static 'images/iron.jpg' %}" alt="Żelazo" class="resource-icon"> Żelazo</th>
+        <th>Ilość do rekrutacji</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit, data in army_data.items %}
+        <tr>
+          <td>{{ unit|capfirst }}</td>
+          <td>{{ village|get_attribute:unit }}</td>
+          <td>{{ data.wood }}</td>
+          <td>{{ data.clay }}</td>
+          <td>{{ data.iron }}</td>
+          <td>
+            <input type="number" name="quantity_{{ unit }}" min="0" value="0">
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <input type="submit" value="Rekrutuj">
+</form>
+
+{% endblock %}

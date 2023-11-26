@@ -8,6 +8,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
 
+from .army_data import army_data
 from .buildings_data import buildings
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -221,3 +222,89 @@ def upgrade_building(request, village_id, building_type):
             return redirect('plemiona:town_hall_view', village_id=village_id)
 
 #
+
+# @login_required2
+def barracks_view(request, village_id):
+    village = Village.objects.get(id=village_id, user=request.user)
+    missing_resources_units = []
+    current_army = {
+        'pikemen': village.pikemen,
+        'halberdiers': village.halberdiers,
+        'axeman': village.axeman,
+        'archer': village.archer,
+    }
+    missing_resources_units = request.session.pop('missing_resources_units', None)
+    context = {
+        'village': village,
+        'army_data': army_data,
+        'current_army': current_army,
+        'missing_resources_units': missing_resources_units
+    }
+    # sprawdzić dalczego nie działa "current_army"
+
+    return render(request, 'plemiona/barracks.html', context)
+
+@login_required
+def recruit_units(request, village_id):
+    if request.method == 'POST':
+        village = Village.objects.get(id=village_id, user=request.user)
+
+        total_wood_needed = 0
+        total_clay_needed = 0
+        total_iron_needed = 0
+
+        for unit, costs in army_data.items():
+            quantity_key = f'quantity_{unit}'
+            quantity = int(request.POST.get(quantity_key, 0))
+
+            if quantity > 0:
+                wood_needed = costs['wood'] * quantity
+                clay_needed = costs['clay'] * quantity
+                iron_needed = costs['iron'] * quantity
+
+                total_wood_needed += wood_needed
+                total_clay_needed += clay_needed
+                total_iron_needed += iron_needed
+
+                # Tutaj możesz dodać logikę sprawdzającą, czy wioska ma wystarczająco surowców
+                # i ewentualnie przeprowadzić rekrutację
+        print(total_wood_needed, total_clay_needed, total_iron_needed)
+                # Sprawdzenie, czy wystarcza surowców
+        if (
+                village.wood >= total_wood_needed
+                and village.clay >= total_clay_needed
+                and village.iron >= total_iron_needed):
+                for unit, costs in army_data.items():
+
+                        quantity_key = f'quantity_{unit}'
+                        quantity = int(request.POST.get(quantity_key, 0))
+
+                        if quantity > 0:
+                            # Aktualizacja liczby jednostek w wiosce
+                            current_quantity = getattr(village, unit, 0)
+                            setattr(village, unit, current_quantity + quantity)
+                    # Logika rekrutacji
+                    # Aktualizacja surowców w wiosce
+                        village.wood -= total_wood_needed
+                        village.clay -= total_clay_needed
+                        village.iron -= total_iron_needed
+                        village.save()
+                    # Przekierowanie po pomyślnej rekrutacji
+                        return redirect('plemiona:barracks_view', village_id=village_id)
+                else:
+                    # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
+                    missing_resources_units = []
+                    if village.wood < total_wood_needed:
+                        missing_resources_units.append('drewno')
+                    if village.clay < total_clay_needed:
+                        missing_resources_units.append('glina')
+                    if village.iron < total_iron_needed:
+                        missing_resources_units.append('żelazo')
+
+                    if missing_resources_units:
+                        request.session['missing_resources_units'] = missing_resources_units
+                        return redirect('plemiona:barracks_view', village_id=village_id)
+
+
+            # Przekierowanie do formularza rekrutacji w przypadku żądania innego niż POST
+        return redirect('plemiona:barracks_view', village_id=village_id)

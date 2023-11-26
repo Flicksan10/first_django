@@ -6,3 +6,5 @@ register = template.Library()
 def get_attribute(value, arg):
     """Pobiera atrybut obiektu dynamicznie."""
     return getattr(value, arg, '')
+
+
