@@ -1,7 +1,7 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
 {% load static  %}
-<div class="map-container">
+<div class="map-container" id="mapContainer">
 <table class="map-table">
     {% for row in game_map %}
     <tr>
@@ -12,7 +12,7 @@
                     {% if cell.id == active_village_id %}
                         <a href="{% url 'plemiona:village_detail' cell.id %}">
                             <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
-                            <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image">
+                            <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image" title=" własciciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}">
                             <img src="{% static 'images/current_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
                         </a>
                         </div>

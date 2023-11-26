@@ -241,17 +241,26 @@ tr:hover {
 /*    width: 100%; !* Szerokość obrazka dopasowana do szerokości komórki *!*/
 /*    height: auto; !* Wysokość obrazka zachowuje proporcje *!*/
 /*}*/
-/*.map-container {*/
-/*    width: 1000px;*/
-/*    height: 1000px;*/
-/*    overflow: auto; !* Włącza przewijanie, jeśli zawartość jest większa niż kontener *!*/
-/*    border: 1px solid #ccc; !* Opcjonalna ramka dla lepszej widoczności *!*/
-/*    position: relative; !* Pozycjonowanie względne dla kontenera *!*/
-/*}*/
+.map-container {
+    max-width: 400px;
+    max-height: 400px;
+    /*overflow: auto; !* Włącza paski przewijania, jeśli zawartość przekracza wymiary kontenera *!*/
+    /* Pozostałe style dla .map-container */
+    overflow: scroll;
+}
+
+.map-container {
+    cursor: grab; /* Kursor do chwytania */
+}
+
+.map-container.grabbing {
+    cursor: grabbing; /* Kursor podczas przeciągania */
+}
 
 .map-table {
     border-collapse: collapse; /* Usuwa odstępy między komórkami */
-    width: auto; /* Pozwala na dopasowanie szerokości tabeli do zawartości */
+    /*width: auto; !* Pozwala na dopasowanie szerokości tabeli do zawartości *!*/
+    min-width: 500px;
 }
 
 .map-table td {
@@ -293,6 +302,32 @@ tr:hover {
     height: 10px;
 }
 
+.village-link {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.village-link:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
 /*.background-image {*/
 /*    position: absolute;*/
 /*       width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/

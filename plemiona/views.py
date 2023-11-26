@@ -136,7 +136,7 @@ def map_view(request):
         #TODO ale sie nie powinno zdarzyć
     # Obsługa przypadku, gdy aktywna wioska nie jest ustawiona
         user_villages = Village.objects.filter(user=request.user)
-    map_size = 11
+    map_size = 100
     game_map = [[" " for _ in range(map_size)] for _ in range(map_size)]
 
     villages = Village.objects.all()
@@ -182,10 +182,8 @@ def town_hall_view(request, village_id):
 def upgrade_building(request, village_id, building_type):
     # Pobierz wioskę
     village = get_object_or_404(Village, id=village_id, user=request.user)
-
     # Pobierz obecny poziom budynku
     current_level = getattr(village, building_type)
-
     # Pobierz dane budynku dla następnego poziomu
     building_data = buildings[building_type]
     next_level_data = next((item for item in building_data if item["lvl"] == current_level + 1), None)
