@@ -21,6 +21,7 @@ from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
+from .scipts_logic.attack_logic import attack_logic_function
 from .tasks import update_resources
 
 
@@ -338,28 +339,7 @@ def attack_view(request, village_id):
         print(x_coordinate,y_coordinate)
         defender_village = get_object_or_404(Village, coordinate_x=x_coordinate, coordinate_y=y_coordinate)
 
-        aggresor_points = 0
-        defender_points = 0
-
-        for unit, data in army_data.items():
-            print("------atakujacy---------")
-            unit_count = int(request.POST.get(f'quantity_{unit}', 0))
-            aggresor_points += unit_count * data['attack']
-            print(aggresor_points,unit,unit_count)
-            print("------obronca---------")
-            defender_unit_count = getattr(defender_village, unit, 0)
-            defender_points += defender_unit_count * data['infantry_defense']
-            print(defender_points, unit, defender_unit_count)
-        ratio = aggresor_points / defender_points if defender_points > 0 else float('inf')
-
-        # Logika walki
-        if ratio >= 2:
-            print("a")
-        elif ratio >= 1.3:
-            print("b")
-        elif ratio < 1:
-            print("c")
-        # itd.
+        attack_logic_function(attacker_village,defender_village,request, village_id)
 
         # Aktualizacja danych po walce
 
