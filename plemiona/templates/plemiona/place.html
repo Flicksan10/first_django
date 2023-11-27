@@ -1,0 +1,51 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+{% load custom_filters %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<h3>{{ village.village_name }}</h3>
+{% if missing_resources_units %}
+  <div class="missing-resources">
+    <strong>Brakuje:</strong> {{ missing_resources_units|join:", " }}
+  </div>
+{% endif %}
+
+<form action="{% url 'plemiona:attack_view' village.id %}" method="post">
+  {% csrf_token %}
+  <table>
+    <thead>
+      <tr>
+        <th>Jednostka</th>
+        <th>Aktualna Liczba</th>
+        <th>skład Ataku</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit, data in army_data.items %}
+        <tr>
+          <td>{{ unit|capfirst }}</td>
+          <td>{{ village|get_attribute:unit }}</td>
+          <td>
+            <input type="number" name="quantity_{{ unit }}" min="0" value="0">
+          </td>
+        </tr>
+      {% endfor %}
+    <tr>
+        <td colspan="3">
+          <label for="x_coordinate">Współrzędna X:</label>
+          <input type="number" id="coordinate_x" name="coordinate_x">
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <label for="y_coordinate">Współrzędna Y:</label>
+          <input type="number" id="coordinate_y" name="coordinate_y">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <input type="submit" value="Rekrutuj">
+</form>
+
+{% endblock %}

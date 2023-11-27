@@ -256,7 +256,7 @@ def recruit_units(request, village_id):
         for unit, costs in army_data.items():
             quantity_key = f'quantity_{unit}'
             quantity = int(request.POST.get(quantity_key, 0))
-
+            # print(quantity_key,quantity)
             if quantity > 0:
                 wood_needed = costs['wood'] * quantity
                 clay_needed = costs['clay'] * quantity
@@ -278,11 +278,13 @@ def recruit_units(request, village_id):
 
                         quantity_key = f'quantity_{unit}'
                         quantity = int(request.POST.get(quantity_key, 0))
+                        print(quantity_key,quantity,unit)
 
                         if quantity > 0:
                             # Aktualizacja liczby jednostek w wiosce
                             current_quantity = getattr(village, unit, 0)
                             setattr(village, unit, current_quantity + quantity)
+                            print(village,unit,current_quantity,quantity)
                     # Logika rekrutacji
                     # Aktualizacja surowców w wiosce
                         village.wood -= total_wood_needed
@@ -290,8 +292,8 @@ def recruit_units(request, village_id):
                         village.iron -= total_iron_needed
                         village.save()
                     # Przekierowanie po pomyślnej rekrutacji
-                        return redirect('plemiona:barracks_view', village_id=village_id)
-                else:
+                return redirect('plemiona:barracks_view', village_id=village_id)
+        else:
                     # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
                     missing_resources_units = []
                     if village.wood < total_wood_needed:
@@ -308,3 +310,62 @@ def recruit_units(request, village_id):
 
             # Przekierowanie do formularza rekrutacji w przypadku żądania innego niż POST
         return redirect('plemiona:barracks_view', village_id=village_id)
+
+
+def place_view(request,village_id):
+
+        village = Village.objects.get(id=village_id, user=request.user)
+        missing_units = []
+
+        missing_resources_units = request.session.pop('missing_units', None)
+        context = {
+            'village': village,
+            'army_data': army_data,
+            'missing_units': missing_resources_units
+        }
+        # sprawdzić dalczego nie działa "current_army"
+        return render(request, 'plemiona/place.html', context)
+
+
+
+
+@login_required
+def attack_view(request, village_id):
+    if request.method == 'POST':
+        attacker_village = get_object_or_404(Village, id=village_id)
+        x_coordinate = request.POST.get('coordinate_x')
+        y_coordinate = request.POST.get('coordinate_y')
+        print(x_coordinate,y_coordinate)
+        defender_village = get_object_or_404(Village, coordinate_x=x_coordinate, coordinate_y=y_coordinate)
+
+        aggresor_points = 0
+        defender_points = 0
+
+        for unit, data in army_data.items():
+            print("------atakujacy---------")
+            unit_count = int(request.POST.get(f'quantity_{unit}', 0))
+            aggresor_points += unit_count * data['attack']
+            print(aggresor_points,unit,unit_count)
+            print("------obronca---------")
+            defender_unit_count = getattr(defender_village, unit, 0)
+            defender_points += defender_unit_count * data['infantry_defense']
+            print(defender_points, unit, defender_unit_count)
+        ratio = aggresor_points / defender_points if defender_points > 0 else float('inf')
+
+        # Logika walki
+        if ratio >= 2:
+            print("a")
+        elif ratio >= 1.3:
+            print("b")
+        elif ratio < 1:
+            print("c")
+        # itd.
+
+        # Aktualizacja danych po walce
+
+        return redirect('plemiona:place_view', village_id=village_id)
+        print("udało sie")
+    else:
+        return render(request, 'attack_form.html', {'village_id': village_id})
+        print("nie udało sie")
+

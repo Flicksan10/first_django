@@ -25,6 +25,8 @@ urlpatterns = [
     path('barracks/<int:village_id>/', views.barracks_view, name='barracks_view'),
     path('upgrade_building/<int:village_id>/<str:building_type>/', views.upgrade_building, name='upgrade_building'),
     path('recruit_units/<int:village_id>/', views.recruit_units, name='recruit_units'),
+    path('place/<int:village_id>/', views.place_view, name='place_view'),
+    path('attack_view/<int:village_id>/', views.attack_view, name='attack_view'),
 ]
 # #
 # urlpatterns = [
