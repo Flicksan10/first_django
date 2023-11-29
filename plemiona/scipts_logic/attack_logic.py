@@ -89,8 +89,9 @@ def calculate_battle_outcome(attack_distribution, defense_distribution):
     battle_outcome = {}
 
     for category in ["infantry", "cavalry", "archer"]:
-        attacker_power = attack_distribution[category]['total_attack']
-        defender_power = defense_distribution[category]['total_defense']
+        # Sprawdzenie, czy kategoria istnieje w dystrybucjach
+        attacker_power = attack_distribution.get(category, {}).get('total_attack', 0)
+        defender_power = defense_distribution.get(category, {}).get('total_defense', 0)
 
         if attacker_power > defender_power:
             winner = 'attacker'
@@ -99,7 +100,7 @@ def calculate_battle_outcome(attack_distribution, defense_distribution):
             winner = 'defender'
             loser_power = attacker_power
 
-        loss_ratio = loser_power / max(attacker_power, defender_power)
+        loss_ratio = loser_power / max(attacker_power, defender_power) if max(attacker_power, defender_power) > 0 else 0
         loss_ratio_adjusted = loss_ratio - random.uniform(0.05, 0.1)
 
         battle_outcome[category] = {
@@ -107,53 +108,104 @@ def calculate_battle_outcome(attack_distribution, defense_distribution):
             'loser_loss_percentage': 100,
             'winner_loss_percentage': max(0, loss_ratio_adjusted * 100)
         }
+
     print(battle_outcome)
     return battle_outcome
 
 
+
 def apply_battle_results(attack_distribution, defense_distribution, battle_outcome):
     for category in ["infantry", "cavalry", "archer"]:
-        outcome = battle_outcome[category]
-        winner = outcome['winner']
-        winner_loss_percentage = outcome['winner_loss_percentage']
-        loser_loss_percentage = outcome['loser_loss_percentage']
+        if category in battle_outcome:
+            outcome = battle_outcome[category]
+            winner = outcome['winner']
+            winner_loss_percentage = outcome['winner_loss_percentage']
+            loser_loss_percentage = outcome['loser_loss_percentage']
 
-        if winner == 'attacker':
-            # Redukcja jednostek obrońcy do 0
-            defense_distribution[category]['units'] = {unit: 0 for unit in defense_distribution[category]['units']}
-            # Redukcja jednostek atakującego
-            for unit, count in attack_distribution[category]['units'].items():
-                attack_distribution[category]['units'][unit] = int(count * (1 - winner_loss_percentage / 100))
-        else:
-            # Redukcja jednostek atakującego do 0
-            attack_distribution[category]['units'] = {unit: 0 for unit in attack_distribution[category]['units']}
-            # Redukcja jednostek obrońcy
-            for unit, count in defense_distribution[category]['units'].items():
-                defense_distribution[category]['units'][unit] = int(count * (1 - winner_loss_percentage / 100))
+            if winner == 'attacker':
+                # Redukcja jednostek obrońcy do 0, jeśli kategoria istnieje
+                if category in defense_distribution:
+                    defense_distribution[category]['units'] = {unit: 0 for unit in defense_distribution[category]['units']}
+                # Redukcja jednostek atakującego, jeśli kategoria istnieje
+                if category in attack_distribution:
+                    for unit, count in attack_distribution[category]['units'].items():
+                        attack_distribution[category]['units'][unit] = int(count * (1 - winner_loss_percentage / 100))
+            else:
+                # Redukcja jednostek atakującego do 0, jeśli kategoria istnieje
+                if category in attack_distribution:
+                    attack_distribution[category]['units'] = {unit: 0 for unit in attack_distribution[category]['units']}
+                # Redukcja jednostek obrońcy, jeśli kategoria istnieje
+                if category in defense_distribution:
+                    for unit, count in defense_distribution[category]['units'].items():
+                        defense_distribution[category]['units'][unit] = int(count * (1 - winner_loss_percentage / 100))
 
+    print("wyniki")
+    print(attack_distribution)
+    print(defense_distribution)
     return attack_distribution, defense_distribution
 
 
+def update_units_for_next_iteration(attack_result, defense_result):
+    updated_attacker_units = {}
+    updated_defender_units = {}
 
-# Przykładowe dane armii
+    # Aktualizacja jednostek atakujących
+    for category, data in attack_result.items():
+        for unit, count in data['units'].items():
+            if count > 0:
+                updated_attacker_units[unit] = count
+
+    # Aktualizacja jednostek broniących
+    for category, data in defense_result.items():
+        for unit, count in data['units'].items():
+            if count > 0:
+                updated_defender_units[unit] = count
+
+    return updated_attacker_units, updated_defender_units
+
+
+# simulate_full_battle(attacker_units, defender_units, army_data)
+# Obliczanie dystrybucji ataku
+
+# attack_distribution = calculate_attack_distribution(attacker_units, army_data)
+# defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
+# battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
+# attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
+# attacker_units, defender_units = update_units_for_next_iteration(attack_result,defense_result)
+# print("atakujacy", attacker_units)
+# print("obronca", defender_units)
+# print("-------update-------------jescze raz to samo--")
+#
+#
+# attack_distribution = calculate_attack_distribution(attacker_units, army_data)
+# defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
+# battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
+# attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
+# attacker_units, defender_units = update_units_for_next_iteration(attack_result,defense_result)
+# print("atakujacy", attacker_units)
+# print("obronca", defender_units)
+
+def simulate_battle(attacker_units, defender_units, army_data):
+    while attacker_units and defender_units:
+        attack_distribution = calculate_attack_distribution(attacker_units, army_data)
+        defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
+        battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
+        attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
+        attacker_units, defender_units = update_units_for_next_iteration(attack_result, defense_result)
+
+        print("atakujacy", attacker_units)
+        print("obronca", defender_units)
+        print("-------update-------------")
+
+    # Sprawdzenie, która strona wygrała
+    if attacker_units:
+        print("Atakujący wygrali z pozostałymi jednostkami:", attacker_units)
+    else:
+        print("Obrońcy wygrali z pozostałymi jednostkami:", defender_units)
 
 attacker_units = {"axeman": 1000,"light_cavalry": 300,"archer_cavalry":100}
-defender_units = {'archer': 1000,"pikemen": 1000,'halberdiers':300}
-# Obliczanie dystrybucji ataku
-attack_distribution = calculate_attack_distribution(attacker_units, army_data)
-# # Rozdzielenie obrony według preferencji
-defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
-# # Tutaj możesz zaimplementować logikę starcia na podstawie obliczonych dystrybucji
-battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
-attack_result,defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
-print(attack_result)
-print(defense_result)
-# print(defense_result)
-# print(defense_result)
+defender_units = {'archer': 1100, "pikemen": 1100,'halberdiers':100}
+# Przykładowe wywołanie funkcji
+simulate_battle(attacker_units, defender_units, army_data)
 
-# ({'cavalry': {'total_units': 300, 'total_attack': 39000, 'percentage': 42.857142857142854, 'units': {'light_cavalry': 25}},
-#   'infantry': {'total_units': 1000, 'total_attack': 40000, 'percentage': 43.956043956043956, 'units': {'axeman': 0}},
-#   'archer': {'total_units': 100, 'total_attack': 12000, 'percentage': 13.186813186813188, 'units': {'archer_cavalry': 76}}},
-#  {'infantry': {'total_units': 880, 'total_defense': 44000, 'units': {'archer': 145, 'pikemen': 0}},
-# 'cavalry': {'total_units': 857, 'total_defense': 38565, 'units': {'pikemen': 0, 'archer': 0}},
-# 'archer': {'total_units': 263, 'total_defense': 3460, 'units': {'pikemen': 0, 'archer': 0}}})
+
