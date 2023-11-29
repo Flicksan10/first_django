@@ -163,28 +163,6 @@ def update_units_for_next_iteration(attack_result, defense_result):
 
     return updated_attacker_units, updated_defender_units
 
-
-# simulate_full_battle(attacker_units, defender_units, army_data)
-# Obliczanie dystrybucji ataku
-
-# attack_distribution = calculate_attack_distribution(attacker_units, army_data)
-# defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
-# battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
-# attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
-# attacker_units, defender_units = update_units_for_next_iteration(attack_result,defense_result)
-# print("atakujacy", attacker_units)
-# print("obronca", defender_units)
-# print("-------update-------------jescze raz to samo--")
-#
-#
-# attack_distribution = calculate_attack_distribution(attacker_units, army_data)
-# defense_distribution = optimize_defense_distribution(defender_units, attack_distribution, army_data)
-# battle_outcome = calculate_battle_outcome(attack_distribution, defense_distribution)
-# attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
-# attacker_units, defender_units = update_units_for_next_iteration(attack_result,defense_result)
-# print("atakujacy", attacker_units)
-# print("obronca", defender_units)
-
 def simulate_battle(attacker_units, defender_units, army_data):
     while attacker_units and defender_units:
         attack_distribution = calculate_attack_distribution(attacker_units, army_data)
@@ -193,19 +171,21 @@ def simulate_battle(attacker_units, defender_units, army_data):
         attack_result, defense_result = apply_battle_results(attack_distribution, defense_distribution, battle_outcome)
         attacker_units, defender_units = update_units_for_next_iteration(attack_result, defense_result)
 
-        print("atakujacy", attacker_units)
-        print("obronca", defender_units)
+        print("attackers", attacker_units)
+        print("defender", defender_units)
         print("-------update-------------")
 
     # Sprawdzenie, która strona wygrała
     if attacker_units:
-        print("Atakujący wygrali z pozostałymi jednostkami:", attacker_units)
+        print("attackers won units left:", attacker_units)
+        winner = 'attacker'
+        return winner,attacker_units
     else:
-        print("Obrońcy wygrali z pozostałymi jednostkami:", defender_units)
+        print("defenders won units left:", defender_units)
+        winner = 'defender'
+        return winner,defender_units
 
-attacker_units = {"axeman": 1000,"light_cavalry": 300,"archer_cavalry":100}
-defender_units = {'archer': 1100, "pikemen": 1100,'halberdiers':100}
-# Przykładowe wywołanie funkcji
-simulate_battle(attacker_units, defender_units, army_data)
-
-
+# attacker_units = {"axeman": 10,'light_cavalry':5}
+# defender_units = {"halberdiers": 8,'archer':15}
+# # Przykładowe wywołanie funkcji
+# simulate_battle(attacker_units, defender_units, army_data)

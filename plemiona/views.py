@@ -21,7 +21,7 @@ from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
-from .scipts_logic.attack_logic import attack_logic_function
+from .scipts_logic.attack_logic import simulate_battle
 from .tasks import update_resources
 
 
@@ -336,16 +336,82 @@ def attack_view(request, village_id):
         attacker_village = get_object_or_404(Village, id=village_id)
         x_coordinate = request.POST.get('coordinate_x')
         y_coordinate = request.POST.get('coordinate_y')
-        print(x_coordinate,y_coordinate)
         defender_village = get_object_or_404(Village, coordinate_x=x_coordinate, coordinate_y=y_coordinate)
+        # logic to take units from form and use them in function
+        units_to_attack = {}
+        for key in request.POST:
+            if key.startswith('quantity-'):
+                unit_name = key.split('-')[1]  # Pobranie nazwy jednostki
+                quantity = int(request.POST.get(key, 0))  # Pobranie ilości jednostek
+                if quantity > 0:
+                    units_to_attack[unit_name] = quantity
 
-        attack_logic_function(attacker_village,defender_village,request, village_id)
+        print("Wspolrzedne X i Y:", x_coordinate, y_coordinate)
+        print("Jednostki do ataku:", units_to_attack)
 
+        #  take units from defender village
+        unit_names = list(army_data.keys())
+        defender_units = {unit: getattr(defender_village, unit,0) for unit in unit_names }
+        defender_units = {k: v for k, v in defender_units.items() if v != 0}
+        print("Jednostki w wiosce obroncy:", defender_units)
+        winner,battle_result = simulate_battle(units_to_attack, defender_units, army_data)
         # Aktualizacja danych po walce
+        print(winner,battle_result)
+
+        update_units_after_battle(attacker_village.id,defender_village.id,units_to_attack,defender_units, winner,battle_result)
 
         return redirect('plemiona:place_view', village_id=village_id)
-        print("udało sie")
+        print("udalo sie")
     else:
         return render(request, 'attack_form.html', {'village_id': village_id})
-        print("nie udało sie")
+        print("nie udalo sie")
 
+
+from django.db import transaction
+
+def update_units_after_battle(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner, battle_result):
+    with transaction.atomic():
+        # Pobierz wioski
+        attacker_village = Village.objects.get(id=attacker_village_id)
+        defender_village = Village.objects.get(id=defender_village_id)
+        print(attacker_village)
+        print(defender_village)
+
+        if winner == 'attacker':
+            # Atakujący wygrywa
+            for unit, count in units_to_attack.items():
+                # Zmniejsz liczbę jednostek atakującego
+                current_count = getattr(attacker_village, unit, 0)
+                setattr(attacker_village, unit, max(current_count - count, 0))
+
+            for unit, count in battle_result.items():
+                # Zwiększ liczbę jednostek atakującego
+                current_count = getattr(attacker_village, unit, 0)
+                setattr(attacker_village, unit, current_count + count)
+
+            for unit, count in defender_units.items():
+                # Zmniejsz liczbę jednostek obrońcy
+                current_count = getattr(defender_village, unit, 0)
+                setattr(defender_village, unit, max(current_count - count, 0))
+
+
+        else:
+            # Obrońca wygrywa
+            for unit, count in units_to_attack.items():
+                # Zmniejsz liczbę jednostek atakującego
+                current_count = getattr(attacker_village, unit, 0)
+                setattr(attacker_village, unit, max(current_count - count, 0))
+
+            for unit, count in defender_units.items():
+                # Zmniejsz liczbę jednostek obrońcy
+                current_count = getattr(defender_village, unit, 0)
+                setattr(defender_village, unit, max(current_count - count, 0))
+
+            for unit, count in battle_result.items():
+                # Zwiększ liczbę jednostek obrońcy
+                current_count = getattr(defender_village, unit, 0)
+                setattr(defender_village, unit, current_count + count)
+
+        # Zapisz zmiany w bazie danych
+        attacker_village.save()
+        defender_village.save()
