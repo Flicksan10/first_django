@@ -341,3 +341,11 @@ tr:hover {
 /*     width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
 /*    height: 50px; !* Wysokość obrazka ustawiona na 50px *!*/
 /*}*/
+
+#village-info {
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 10px;
+    z-index: 1000; /* Aby upewnić się, że kontener jest na wierzchu */
+    /* Dodaj inne style według potrzeb */
+}

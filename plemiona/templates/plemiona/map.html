@@ -2,6 +2,9 @@
 {% block content %}
 {% load static  %}
 <div class="map-container" id="mapContainer">
+  <div id="village-info" style="display: none; position: absolute;">
+    <!-- Informacje o wiosce będą tutaj wstawiane przez JavaScript -->
+</div>
 <table class="map-table">
     {% for row in game_map %}
     <tr>

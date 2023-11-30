@@ -22,6 +22,7 @@ import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
 from .scipts_logic.attack_logic import simulate_battle
+from .scipts_logic.loot_from_village import calculate_loot
 from .tasks import update_resources
 
 
@@ -354,6 +355,9 @@ def attack_view(request, village_id):
         defender_units = {unit: getattr(defender_village, unit,0) for unit in unit_names }
         defender_units = {k: v for k, v in defender_units.items() if v != 0}
         print("Jednostki w wiosce obroncy:", defender_units)
+        defender_units={"halberdiers": 8,'archer':15}
+        units_to_attack = {"axeman": 100, 'light_cavalry': 5}
+        battle_result = {'axeman': 80, 'light_cavalry': 4}
         winner,battle_result = simulate_battle(units_to_attack, defender_units, army_data)
         # Aktualizacja danych po walce
         print(winner,battle_result)
@@ -374,44 +378,30 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
         # Pobierz wioski
         attacker_village = Village.objects.get(id=attacker_village_id)
         defender_village = Village.objects.get(id=defender_village_id)
-        print(attacker_village)
-        print(defender_village)
 
         if winner == 'attacker':
             # Atakujący wygrywa
             for unit, count in units_to_attack.items():
-                # Zmniejsz liczbę jednostek atakującego
+                loss = count - battle_result.get(unit, 0)
                 current_count = getattr(attacker_village, unit, 0)
-                setattr(attacker_village, unit, max(current_count - count, 0))
-
-            for unit, count in battle_result.items():
-                # Zwiększ liczbę jednostek atakującego
-                current_count = getattr(attacker_village, unit, 0)
-                setattr(attacker_village, unit, current_count + count)
+                setattr(attacker_village, unit, max(current_count - loss, 0))
 
             for unit, count in defender_units.items():
-                # Zmniejsz liczbę jednostek obrońcy
                 current_count = getattr(defender_village, unit, 0)
                 setattr(defender_village, unit, max(current_count - count, 0))
-
-
+            calculate_loot(battle_result, army_data, defender_village,attacker_village)
         else:
             # Obrońca wygrywa
             for unit, count in units_to_attack.items():
-                # Zmniejsz liczbę jednostek atakującego
                 current_count = getattr(attacker_village, unit, 0)
                 setattr(attacker_village, unit, max(current_count - count, 0))
 
             for unit, count in defender_units.items():
-                # Zmniejsz liczbę jednostek obrońcy
+                loss = count - battle_result.get(unit, 0)
                 current_count = getattr(defender_village, unit, 0)
-                setattr(defender_village, unit, max(current_count - count, 0))
-
-            for unit, count in battle_result.items():
-                # Zwiększ liczbę jednostek obrońcy
-                current_count = getattr(defender_village, unit, 0)
-                setattr(defender_village, unit, current_count + count)
+                setattr(defender_village, unit, max(current_count - loss, 0))
 
         # Zapisz zmiany w bazie danych
         attacker_village.save()
         defender_village.save()
+

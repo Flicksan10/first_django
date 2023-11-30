@@ -18,6 +18,9 @@ def update_resources():
         village.wood += wood_increase
         village.clay += clay_increase
         village.iron += iron_increase
+        # village.wood += 50000
+        # village.clay += 50000
+        # village.iron += 50000
         # print(village.wood)
         village.save()
 

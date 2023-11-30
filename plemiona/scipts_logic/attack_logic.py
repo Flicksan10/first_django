@@ -185,7 +185,11 @@ def simulate_battle(attacker_units, defender_units, army_data):
         winner = 'defender'
         return winner,defender_units
 
-# attacker_units = {"axeman": 10,'light_cavalry':5}
+# attacker_units = {"axeman": 100,'light_cavalry':5}
 # defender_units = {"halberdiers": 8,'archer':15}
-# # Przykładowe wywołanie funkcji
-# simulate_battle(attacker_units, defender_units, army_data)
+# Przykładowe wywołanie funkcji
+
+
+# wynik,jednostki=simulate_battle(attacker_units, defender_units, army_data)
+#
+# print(wynik,jednostki)

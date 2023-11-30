@@ -32,3 +32,22 @@ mapContainer.addEventListener('mousemove', (e) => {
     const walkY = (y - startX) * 1; // Prędkość przewijania
     mapContainer.scrollTop = scrollTop - walkY;
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const villages = document.querySelectorAll('.image-container a');
+    const infoBox = document.getElementById('village-info');
+
+    villages.forEach(village => {
+        village.addEventListener('mouseover', function(event) {
+            const villageData = this.querySelector('.foreground-image').title;
+            infoBox.innerHTML = villageData;
+            infoBox.style.display = 'block';
+            infoBox.style.left = event.pageX + 'px';
+            infoBox.style.top = event.pageY + 'px';
+        });
+
+        village.addEventListener('mouseout', function() {
+            infoBox.style.display = 'none';
+        });
+    });
+});
