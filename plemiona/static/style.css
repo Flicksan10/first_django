@@ -242,8 +242,8 @@ tr:hover {
 /*    height: auto; !* Wysokość obrazka zachowuje proporcje *!*/
 /*}*/
 .map-container {
-    max-width: 400px;
-    max-height: 400px;
+    max-width: 600px;
+    max-height: 600px;
     /*overflow: auto; !* Włącza paski przewijania, jeśli zawartość przekracza wymiary kontenera *!*/
     /* Pozostałe style dla .map-container */
     overflow: scroll;
@@ -307,27 +307,27 @@ tr:hover {
     display: inline-block;
 }
 
-.tooltip {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: white;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-    bottom: 100%;
-    left: 50%;
-    margin-left: -60px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
+/*.tooltip {*/
+/*    visibility: hidden;*/
+/*    width: 120px;*/
+/*    background-color: black;*/
+/*    color: white;*/
+/*    text-align: center;*/
+/*    border-radius: 6px;*/
+/*    padding: 5px 0;*/
+/*    position: absolute;*/
+/*    z-index: 1;*/
+/*    bottom: 100%;*/
+/*    left: 50%;*/
+/*    margin-left: -60px;*/
+/*    opacity: 0;*/
+/*    transition: opacity 0.3s;*/
+/*}*/
 
-.village-link:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
-}
+/*.village-link:hover .tooltip {*/
+/*    visibility: visible;*/
+/*    opacity: 1;*/
+/*}*/
 /*.background-image {*/
 /*    position: absolute;*/
 /*       width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
@@ -345,7 +345,11 @@ tr:hover {
 #village-info {
     border: 1px solid #ccc;
     background-color: white;
-    padding: 10px;
-    z-index: 1000; /* Aby upewnić się, że kontener jest na wierzchu */
-    /* Dodaj inne style według potrzeb */
+    padding: 1px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+#village-info.visible {
+    opacity: 1;
 }

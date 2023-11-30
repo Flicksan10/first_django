@@ -39,15 +39,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     villages.forEach(village => {
         village.addEventListener('mouseover', function(event) {
-            const villageData = this.querySelector('.foreground-image').title;
-            infoBox.innerHTML = villageData;
-            infoBox.style.display = 'block';
-            infoBox.style.left = event.pageX + 'px';
-            infoBox.style.top = event.pageY + 'px';
+            var info = this.querySelector('.foreground-image').getAttribute('data-info');
+            var rect = this.getBoundingClientRect();
+            infoBox.innerHTML = info;
+            infoBox.classList.add('visible');
+            infoBox.style.left = rect.left + window.scrollX + 'px';
+            infoBox.style.top = rect.bottom + window.scrollY + 'px';
         });
 
         village.addEventListener('mouseout', function() {
-            infoBox.style.display = 'none';
+            infoBox.classList.remove('visible');
         });
     });
 });
+
+
