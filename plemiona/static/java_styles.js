@@ -34,23 +34,28 @@ mapContainer.addEventListener('mousemove', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    const villages = document.querySelectorAll('.image-container a');
+    const hitboxes = document.querySelectorAll('.hitbox');
     const infoBox = document.getElementById('village-info');
 
-    villages.forEach(village => {
-        village.addEventListener('mouseover', function(event) {
-            var info = this.querySelector('.foreground-image').getAttribute('data-info');
-            var rect = this.getBoundingClientRect();
+    hitboxes.forEach(hitbox => {
+        hitbox.addEventListener('mouseover', function(event) {
+            var info = this.getAttribute('data-info');
             infoBox.innerHTML = info;
             infoBox.classList.add('visible');
-            infoBox.style.left = rect.left + window.scrollX + 'px';
-            infoBox.style.top = rect.bottom + window.scrollY + 'px';
+
+            // Dodajemy stałą wartość do pozycji, aby przesunąć infoBox dalej od kursora
+            const offset = 20; // Możesz dostosować tę wartość według potrzeb
+            infoBox.style.left = (event.clientX + offset) + 'px';
+            infoBox.style.top = (event.clientY + offset) + 'px';
         });
 
-        village.addEventListener('mouseout', function() {
+        hitbox.addEventListener('mouseout', function() {
             infoBox.classList.remove('visible');
         });
     });
 });
+
+
+
 
 
