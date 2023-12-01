@@ -147,9 +147,14 @@ def map_view(request):
         if 0 <= village.coordinate_x < map_size and 0 <= village.coordinate_y < map_size:
             game_map[village.coordinate_y][village.coordinate_x] = village
     print(game_map)
+    num_columns = len(game_map[0]) if game_map else 0
+    column_numbers = list(range(num_columns))
+    game_map_with_row_numbers = [(row_num, row) for row_num, row in enumerate(game_map)]
+
     context = {
-        'game_map': game_map,  # Załóżmy, że game_map to twoja mapa gry
-        'active_village_id': active_village_id
+        'game_map': game_map_with_row_numbers,  # Załóżmy, że game_map to twoja mapa gry
+        'active_village_id': active_village_id,
+        'column_numbers': column_numbers,
     }
     return render(request, 'plemiona/map.html', context)
 

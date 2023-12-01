@@ -4,19 +4,39 @@
 <html>
 <head>
     <title>Your Django App</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Twoje własne style CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 </head>
-<body>
-    <header>
-        <p><a href="{% url 'plemiona:logout' %}">Wyloguj się </a></p>
-        <p> <a href="{% url 'plemiona:map_view' %}">MAPA </a></p>
-        <p> <a href="{% url 'plemiona:get_user_village' %}">Wszystkie wioski </a></p>
-    </header>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'plemiona:get_user_village' %}">Twoja Gra</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:map_view' %}">Mapa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:get_user_village' %}">Wszystkie wioski</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:logout' %}">Wyloguj się</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<body style="background-color: #f8f9fa;"> <!-- Szare tło -->
+    <!-- Reszta Twojego kodu -->
 
     {% if request.session.active_village %}
         {% with active_village_id=request.session.active_village %}
             {% get_active_village request as active_village %}
-            <table>
+            <div class="container mt-4">
+                <table class="table">
                 <tr>
                     <th>Nazwa Wioski</th>
                     <th>Koordynaty</th>
@@ -36,9 +56,11 @@
                     <!-- Dodaj więcej danych zgodnie z potrzebami -->
                 </tr>
             </table>
+            </div>
         {% endwith %}
     {% endif %}
 
+    <!-- Reszta Twojego kodu -->
     {% block content %}
     {% endblock %}
 
@@ -46,5 +68,10 @@
         <!-- Your common footer content -->
     </footer>
 <script src="{% static 'java_styles.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'java_styles.js' %}"></script>
+
 </body>
 </html>

@@ -38,15 +38,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const infoBox = document.getElementById('village-info');
 
     hitboxes.forEach(hitbox => {
-        hitbox.addEventListener('mouseover', function(event) {
+        hitbox.addEventListener('mouseover', function() {
             var info = this.getAttribute('data-info');
+            var rect = this.getBoundingClientRect();
             infoBox.innerHTML = info;
             infoBox.classList.add('visible');
 
-            // Dodajemy stałą wartość do pozycji, aby przesunąć infoBox dalej od kursora
-            const offset = 20; // Możesz dostosować tę wartość według potrzeb
-            infoBox.style.left = (event.clientX + offset) + 'px';
-            infoBox.style.top = (event.clientY + offset) + 'px';
+            // Ustawienie infoBox nad obiektem, który wywołał dymek
+            const xOffset = -100; // Odległość od obiektu w poziomie
+            const yOffset = 10; // Odległość od obiektu w pionie
+            infoBox.style.left = (rect.left + xOffset + window.scrollX) + 'px';
+            infoBox.style.top = (rect.top + yOffset + window.scrollY - infoBox.offsetHeight) + 'px';
         });
 
         hitbox.addEventListener('mouseout', function() {

@@ -2,50 +2,57 @@
 {% block content %}
 {% load static  %}
 <div class="map-container" id="mapContainer">
-        <div id="village-info"></div>
-<table class="map-table">
-    {% for row in game_map %}
-    <tr>
-        {% for cell in row %}
-            <td>
-                {% if cell != ' ' %}
-                    <div class="image-container">
-                    {% if cell.id == active_village_id %}
-                        <a href="{% url 'plemiona:village_detail' cell.id %}">
-                            <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
-                            <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
-                            <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image">
-                            <img src="{% static 'images/current_village.png' %}" alt="Wioska" class="foreground-image foreground-image2" >
-                        </a>
-                        </div>
-                    {% elif cell.user == request.user %}
-                        <div class="image-container">
-                        <a href="{% url 'plemiona:village_detail' cell.id %}">
-                            <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
-                            <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
-                            <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image" >
-                            <img src="{% static 'images/your_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
-                        </a>
-                        </div>
-                    {% else %}
-                        <div class="image-container">
-                        <a href="{% url 'plemiona:village_detail' cell.id %}">
-                            <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
-                            <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
-                            <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image" >
-                            <img src="{% static 'images/other_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
-                        </a>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <img src="{% static 'images/game_basic_map.jpg' %}" alt="Trawa" class="map-icon">
-                {% endif %}
-            </td>
+    <div id="village-info"></div>
+    <table class="map-table">
+        <!-- Dodanie nagłówka dla numerów kolumn -->
+        <tr>
+            <td></td> <!-- Pusta komórka dla rogu tabeli -->
+            {% for i in column_numbers %}
+                <td class="map-header">{{ i }}</td>
+            {% endfor %}
+        </tr>
+
+        <!-- Generowanie wierszy mapy z numerami wierszy -->
+        {% for row_num, row in game_map%}
+            <tr>
+                <td class="map-header">{{ row_num }}</td> <!-- Numer wiersza -->
+                {% for cell in row %}
+                    <td>
+                        {% if cell != ' ' %}
+                            <div class="image-container">
+                                {% if cell.id == active_village_id %}
+                                    <a href="{% url 'plemiona:village_detail' cell.id %}">
+                                        <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
+                                        <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
+                                        <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image">
+                                        <img src="{% static 'images/current_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
+                                    </a>
+                                {% elif cell.user == request.user %}
+                                    <a href="{% url 'plemiona:village_detail' cell.id %}">
+                                        <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
+                                        <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
+                                        <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image">
+                                        <img src="{% static 'images/your_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'plemiona:village_detail' cell.id %}">
+                                        <div class="hitbox" data-info="właściciel: {{ cell.user.username}}, wioska: {{ cell.village_name }}"></div>
+                                        <img src="{% static 'images/game_basic_map.jpg' %}" alt="Tło" class="background-image">
+                                        <img src="{% static 'images/transparent_castle.png' %}" alt="Wioska" class="foreground-image">
+                                        <img src="{% static 'images/other_village.png' %}" alt="Wioska" class="foreground-image foreground-image2">
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <img src="{% static 'images/game_basic_map.jpg' %}" alt="Trawa" class="map-icon">
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
         {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
-    </div>
+    </table>
+</div>
+
 {#    <script src="{% static 'java_styles.js' %}"></script>#}
 {% endblock %}
 

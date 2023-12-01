@@ -290,9 +290,10 @@ tr:hover {
     height: 100%; /* Rozciąga obrazek na całą wysokość kontenera */
 }
 .foreground-image {
-    padding: 5px;
-    width: 80%; /* Rozciąga obrazek na całą szerokość kontenera */
-    height: 80%; /
+    padding: 1px;
+    margin-left: 2px;
+    width: 90%; /* Rozciąga obrazek na całą szerokość kontenera */
+    height: 90%; /
 }
 /* to jest dla kropki okreslajacej relacje*/
 .foreground-image2 {
@@ -318,6 +319,26 @@ tr:hover {
     cursor: pointer; /* Opcjonalnie, aby pokazać, że można kliknąć */
     opacity: 0; /* Niewidzialny */
 }
+
+
+.map-header {
+    position: sticky;
+    background-color: white;
+    z-index: 10;
+    text-align: center; /* Wyśrodkowanie tekstu */
+    min-width: 30px; /* Minimalna szerokość komórki */
+}
+
+.map-header:first-child {
+    left: 0; /* Dla numerów wierszy */
+    width: 30px; /* Ustaw szerokość komórki z numerem wiersza */
+}
+
+.map-table tr:first-child .map-header {
+    top: 0; /* Dla numerów kolumn */
+}
+
+
 /*.tooltip {*/
 /*    visibility: hidden;*/
 /*    width: 120px;*/
