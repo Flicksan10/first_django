@@ -7,8 +7,6 @@ class Village(models.Model):
     village_name = models.CharField(max_length=100, default='New Village')
     coordinate_x = models.IntegerField(default=1)
     coordinate_y = models.IntegerField(default=1)
-    town_hall = models.IntegerField(default=1)
-    barracks = models.IntegerField(default=0)
     pikemen = models.IntegerField(default=0)
     halberdiers = models.IntegerField(default=0)
     archer = models.IntegerField(default=0)
@@ -19,11 +17,26 @@ class Village(models.Model):
     wood = models.IntegerField(default=1000)
     iron = models.IntegerField(default=1000)
     clay = models.IntegerField(default=1000)
-    granary = models.IntegerField(default=5000)
+    town_hall = models.IntegerField(default=1)
+    barracks = models.IntegerField(default=0)
+    granary = models.IntegerField(default=1)
     farm = models.IntegerField(default=500)
     sawmill = models.IntegerField(default=1)
     iron_mine = models.IntegerField(default=1)
     clay_pit = models.IntegerField(default=1)
+    stable = models.IntegerField(default=0)
+    workshop = models.IntegerField(default=0)
+    forge = models.IntegerField(default=0)
+    market = models.IntegerField(default=0)
+    wall = models.IntegerField(default=0)
+    cache = models.IntegerField(default=0)
+    palace = models.IntegerField(default=0)
+    population_total = models.IntegerField(default=0)
+    population_buildings = models.IntegerField(default=0)
+    population_army = models.IntegerField(default=0)
+    raports = models.CharField(max_length=10000, default='New Village')
+
+
 
 
 
