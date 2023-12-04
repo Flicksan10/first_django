@@ -1,4 +1,4 @@
-buildings = {
+buildings_data_dict = {
     'sawmill': {
         1: {"wood": 50, "clay": 60, "iron": 40, "people_needed": 5, "total_population": 5, "performance": 15},
         2: {"wood": 63, "clay": 77, "iron": 50, "people_needed": 1, "total_population": 6, "performance": 17},
@@ -159,7 +159,7 @@ buildings = {
         29: {"wood": 58159, "clay": 72007, "iron": 45235, "people_needed": 59, "total_population": 406, "build_time": 24},
         30: {"wood": 73280, "clay": 91809, "iron": 56996, "people_needed": 69, "total_population": 475, "build_time": 23}
 },
-    'barrcks': {
+    'barracks': {
         1: {"wood": 200, "clay": 170, "iron": 90, "peolpe_needed": 7, "total_population": 7, "performace": "63%"},
         2: {"wood": 252, "clay": 218, "iron": 113, "peolpe_needed": 1, "total_population": 8, "performace": "59%"},
         3: {"wood": 318, "clay": 279, "iron": 143, "peolpe_needed": 2, "total_population": 10, "performace": "56%"},
@@ -367,14 +367,9 @@ buildings = {
         9: {"wood": 298, "clay": 358, "iron": 298, "people_needed": 1, "total_population": 7, "hidden_resources": 1500},
         10: {"wood": 373, "clay": 447, "iron": 373, "people_needed": 1, "total_population": 8, "hidden_resources": 2000}
 },
-    "palace":{
+    "palace" : {
         1: {"wood": 15000, "clay": 25000, "iron": 10000, "people_needed": 80, "total_population": 80, "performance": 63}
 
     }
-
-
-
-
-
 
 }

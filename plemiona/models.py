@@ -20,7 +20,7 @@ class Village(models.Model):
     town_hall = models.IntegerField(default=1)
     barracks = models.IntegerField(default=0)
     granary = models.IntegerField(default=1)
-    farm = models.IntegerField(default=500)
+    farm = models.IntegerField(default=1)
     sawmill = models.IntegerField(default=1)
     iron_mine = models.IntegerField(default=1)
     clay_pit = models.IntegerField(default=1)
@@ -34,8 +34,8 @@ class Village(models.Model):
     population_total = models.IntegerField(default=0)
     population_buildings = models.IntegerField(default=0)
     population_army = models.IntegerField(default=0)
-    raports = models.CharField(max_length=10000, default='New Village')
 
+    #     raports = models.CharField(max_length=10000, default='New Village')
 
 
 

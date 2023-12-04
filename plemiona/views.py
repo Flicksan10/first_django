@@ -9,10 +9,12 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
 
 from .army_data import army_data
-from .buildings_data import buildings
+# from .buildings_data import buildings
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+
+
 from .models import Village
 from django.urls import reverse_lazy
 from .forms import UserRegisterForm
@@ -23,6 +25,7 @@ from django.db import IntegrityError
 from .forms import CustomLoginForm
 from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.loot_from_village import calculate_loot
+from .buildings_data.buildings import buildings_data_dict
 from .tasks import update_resources
 
 
@@ -164,14 +167,14 @@ def town_hall_view(request, village_id):
     missing_resources = []
     next_levels = {}
     building_levels = {}
-    for building in buildings:
+    for building, levels in buildings_data_dict.items():
         current_level = getattr(village, building)
-        next_level_data = next((item for item in buildings[building] if item["lvl"] == current_level + 1), None)
+        next_level_data = levels.get(current_level + 1)
         next_levels[building] = next_level_data
         building_levels[building] = current_level
-    print("dane")
-    print(next_levels)
-    print(building_levels)
+    # print("dane")
+    # print(next_levels)
+    # print(building_levels)
     missing_resources = request.session.pop('missing_resources', None)
     context = {
         'village': village,
@@ -192,9 +195,13 @@ def upgrade_building(request, village_id, building_type):
     village = get_object_or_404(Village, id=village_id, user=request.user)
     # Pobierz obecny poziom budynku
     current_level = getattr(village, building_type)
+
     # Pobierz dane budynku dla następnego poziomu
-    building_data = buildings[building_type]
-    next_level_data = next((item for item in building_data if item["lvl"] == current_level + 1), None)
+    building_data = buildings_data_dict.get(building_type, {})
+    next_level_data = building_data.get(current_level + 1)
+    print(current_level)
+    print(building_data)
+    print(next_level_data)
 
     if not next_level_data:
         # Przekieruj z powrotem do town_hall z komunikatem o błędzie
