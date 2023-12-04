@@ -14,7 +14,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-
+from .models import Message
+from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
 from .forms import UserRegisterForm
@@ -417,3 +418,86 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
         attacker_village.save()
         defender_village.save()
 
+# send message
+def send_message(request):
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            receiver_username = form.cleaned_data['receiver']
+            topic = form.cleaned_data['topic']
+            content = form.cleaned_data['content']
+            reply_to_id = form.cleaned_data.get('reply_to')
+
+
+            receiver = get_object_or_404(User, username=receiver_username)
+            message = Message(
+                user=request.user,
+                sender=request.user,
+                receiver=receiver,
+                content=content,
+                topic=topic
+            )
+
+            if reply_to_id:
+                reply_to_message = get_object_or_404(Message, id=reply_to_id)
+                message.reply_to = reply_to_message
+            print(message)
+            message.save()
+            return redirect('plemiona:sent_messages')  # Przekieruj do odpowiedniego widoku po wysłaniu wiadomości
+    else:
+        form = MessageForm()
+
+        # Jeśli widok jest używany do odpowiedzi na wiadomość, ustaw wartość pola 'reply_to'
+        reply_to_id = request.GET.get('reply_to')
+        if reply_to_id:
+            form.fields['reply_to'].initial = reply_to_id
+
+    return render(request, 'plemiona/send_message.html', {'form': form})
+
+
+def sent_messages_view(request):
+    sent_messages = Message.objects.filter(sender=request.user)
+    return render(request, 'plemiona/sent_messages.html', {'messages': sent_messages})
+
+
+def received_messages_view(request):
+    received_messages = Message.objects.filter(receiver=request.user)
+    return render(request, 'plemiona/received_messages.html', {'messages': received_messages})
+
+def message_detail(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    return render(request, 'plemiona/message_detail.html', {'message': message})
+
+@login_required
+def send_reply(request, message_id):
+    original_message = get_object_or_404(Message, id=message_id)
+
+    # Upewnij się, że użytkownik ma uprawnienia do odpowiedzi (np. jest odbiorcą oryginalnej wiadomości)
+    if request.user != original_message.receiver:
+        # Możesz tutaj przekierować do strony błędu lub wyświetlić komunikat
+        return redirect('some_error_view')
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            topic = form.cleaned_data['topic']
+            content = form.cleaned_data['content']
+
+            # Tworzenie nowej wiadomości jako odpowiedzi
+            reply_message = Message(
+                user=request.user,
+                sender=request.user,
+                receiver=original_message.sender,  # Nadawca oryginalnej wiadomości staje się odbiorcą odpowiedzi
+                topic=topic,
+                content=content,
+                reply_to=original_message  # Ustawienie oryginalnej wiadomości jako wiadomości, na którą odpowiadamy
+            )
+            reply_message.save()
+
+            # Przekierowanie do widoku po pomyślnym wysłaniu odpowiedzi
+            return redirect('plemiona:sent_messages')  # Zakładam, że istnieje taki widok
+    else:
+        # Ustawienie domyślnego tematu jako "Re: [temat oryginalnej wiadomości]"
+        form = MessageForm(initial={'topic': 'Re: ' + original_message.topic})
+
+    return render(request, 'plemiona/send_message.html', {'form': form})

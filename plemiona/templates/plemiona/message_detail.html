@@ -1,0 +1,9 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<!-- received_messages.html -->
+
+<h2>{{ message.topic }}</h2>
+<p>{{ message.content }}</p>
+<a href="{% url 'send_reply' message.id %}">Odpowiedz</a>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<!-- received_messages.html -->
+
+<h2>Odebrane Wiadomości</h2>
+<ul>
+    {% for message in messages %}
+        <li>
+            Od: {{ message.sender.username }} - {{ message.content }} - {{ message.date }}
+        </li>
+    {% empty %}
+        <li>Brak odebranych wiadomości.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

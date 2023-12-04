@@ -1,0 +1,11 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<!-- send_message.html -->
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Wyślij wiadomość</button>
+</form>
+
+{% endblock %}

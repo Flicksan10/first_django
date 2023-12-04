@@ -23,3 +23,11 @@ class CustomLoginForm(AuthenticationForm):
     # Dodaj swoje dodatkowe pola
     pass
     # custom_field = forms.CharField(required=False)
+
+
+class MessageForm(forms.Form):
+    receiver = forms.CharField(max_length=100)
+    topic = forms.CharField(max_length=100, label='Temat')
+    content = forms.CharField(widget=forms.Textarea)
+    # to let answer to message
+    reply_to = forms.IntegerField(required=False, widget=forms.HiddenInput())

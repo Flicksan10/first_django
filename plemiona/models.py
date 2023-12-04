@@ -2,6 +2,9 @@ from django.db import models, IntegrityError
 from django.conf import settings
 import random
 
+from django import forms
+
+
 class Village(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     village_name = models.CharField(max_length=100, default='New Village')
@@ -87,7 +90,8 @@ class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
-    content = models.TextField()
+    content = forms.CharField(widget=forms.Textarea)
+    topic = models.CharField(max_length=100,default='Brak tematu')
 
     def __str__(self):
         return f"Message from {self.sender.username} to {self.receiver.username} on {self.date}"
