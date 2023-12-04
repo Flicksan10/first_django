@@ -33,6 +33,7 @@ urlpatterns = [
     path('messages/received/', received_messages_view, name='received_messages'),
     path('messages/<int:message_id>/', message_detail, name='message_detail'),
     path('messages/reply/<int:message_id>/', send_reply, name='send_reply'),
+
 ]
 # #
 # urlpatterns = [

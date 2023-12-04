@@ -90,7 +90,7 @@ class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
-    content = forms.CharField(widget=forms.Textarea)
+    content = models.TextField(default='brak tresci')  # Upewnij się, że to pole istnieje
     topic = models.CharField(max_length=100,default='Brak tematu')
 
     def __str__(self):

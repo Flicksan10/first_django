@@ -443,7 +443,7 @@ def send_message(request):
                 message.reply_to = reply_to_message
             print(message)
             message.save()
-            return redirect('plemiona:sent_messages')  # Przekieruj do odpowiedniego widoku po wysłaniu wiadomości
+            return redirect('plemiona:message_detail', message_id=message.id) # Przekieruj do odpowiedniego widoku po wysłaniu wiadomości
     else:
         form = MessageForm()
 
