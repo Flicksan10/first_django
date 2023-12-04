@@ -63,3 +63,31 @@ class Village(models.Model):
 #     def __str__(self):              # __unicode__ on Python 2
 #         return self.choice_text
 
+class Reports(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    report_type = models.CharField(max_length=100)
+    attacker = models.CharField(max_length=100)
+    defender = models.CharField(max_length=100)
+    village_attacker_name = models.CharField(max_length=100)
+    village_defender_name = models.CharField(max_length=100)
+    result = models.CharField(max_length=100)
+    village_attacker_coordinates_x = models.IntegerField()
+    village_attacker_coordinates_y = models.IntegerField()
+    village_defender_coordinates_x = models.IntegerField()
+    village_defender_coordinates_y = models.IntegerField()
+    details = models.CharField(max_length=1000)
+    def __str__(self):
+        return f"Report {self.id} by {self.user.username}"
+
+
+class Message(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
+    reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    content = models.TextField()
+
+    def __str__(self):
+        return f"Message from {self.sender.username} to {self.receiver.username} on {self.date}"
