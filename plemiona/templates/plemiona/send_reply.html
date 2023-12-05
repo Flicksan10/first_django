@@ -2,20 +2,22 @@
 {% block content %}
 <!-- send_reply.html -->
 
+<!-- send_reply.html -->
+
+<div class="message-thread">
+    {% for message in thread %}
+        <div class="message">
+            <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Formularz odpowiedzi -->
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Wyślij</button>
+    <button type="submit">Odpowiedz</button>
 </form>
-
-<h3>Poprzednie Wiadomości:</h3>
-<div>
-    {% for message in previous_messages %}
-        <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
-    {% empty %}
-        <p>Brak poprzednich wiadomości.</p>
-    {% endfor %}
-</div>
 
 {#    <script src="{% static 'java_styles.js' %}"></script>#}
 {% endblock %}

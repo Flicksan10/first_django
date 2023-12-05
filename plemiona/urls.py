@@ -10,7 +10,7 @@ app_name = "plemiona"
 #     path('', village_list, name='village_list'),
 # ]
 from .views import get_user_village, register, create_village_for_user, CustomLoginView, send_message, \
-    received_messages_view, sent_messages_view, message_detail, send_reply, user_details
+    received_messages_view, sent_messages_view, message_detail, send_reply, user_details, all_messages_view
 
 urlpatterns = [
     path('admin/create_village/', views.admin_create_village, name='admin_create_village'),
@@ -34,6 +34,7 @@ urlpatterns = [
     path('messages/<int:message_id>/', message_detail, name='message_detail'),
     path('messages/reply/<int:message_id>/', send_reply, name='send_reply'),
     path('user/<int:user_id>/', user_details, name='user_details'),
+    path('messages/all/', all_messages_view, name='all_messages_view'),
 
 ]
 # #

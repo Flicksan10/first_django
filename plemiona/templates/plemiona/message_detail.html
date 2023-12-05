@@ -2,8 +2,20 @@
 {% block content %}
 <!-- received_messages.html -->
 
-<h2>{{ message.topic }}</h2>
-<p>{{ message.content }}</p>
-<a href="{% url 'plemiona:send_reply' message.id %}">Odpowiedz</a>
+<!-- message_detail.html -->
+
+    <h2>{{ message.topic }}</h2>
+    <p>{{ message.content }}</p>
+    <a href="{% url 'plemiona:send_reply' message.id %}">Odpowiedz</a>
+
+    <hr>
+    <h3>Historia Konwersacji:</h3>
+    <div class="message-thread">
+        {% for msg in thread %}
+            <div class="message">
+                <p><strong>{{ msg.sender.username }}:</strong> {{ msg.content }}</p>
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}
