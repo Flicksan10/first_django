@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from .models import Message
-from .forms import MessageForm
+from .forms import MessageForm, ReplyMessageForm
 from .models import Village
 from django.urls import reverse_lazy
 from .forms import UserRegisterForm
@@ -423,34 +423,13 @@ def send_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            receiver_username = form.cleaned_data['receiver']
-            topic = form.cleaned_data['topic']
-            content = form.cleaned_data['content']
-            reply_to_id = form.cleaned_data.get('reply_to')
-
-
-            receiver = get_object_or_404(User, username=receiver_username)
-            message = Message(
-                user=request.user,
-                sender=request.user,
-                receiver=receiver,
-                content=content,
-                topic=topic
-            )
-
-            if reply_to_id:
-                reply_to_message = get_object_or_404(Message, id=reply_to_id)
-                message.reply_to = reply_to_message
-            print(message)
-            message.save()
-            return redirect('plemiona:message_detail', message_id=message.id) # Przekieruj do odpowiedniego widoku po wysłaniu wiadomości
+            new_message = form.save(commit=False)
+            new_message.user = request.user
+            new_message.sender = request.user
+            new_message.save()
+            return redirect('plemiona:sent_messages')
     else:
         form = MessageForm()
-
-        # Jeśli widok jest używany do odpowiedzi na wiadomość, ustaw wartość pola 'reply_to'
-        reply_to_id = request.GET.get('reply_to')
-        if reply_to_id:
-            form.fields['reply_to'].initial = reply_to_id
 
     return render(request, 'plemiona/send_message.html', {'form': form})
 
@@ -471,33 +450,27 @@ def message_detail(request, message_id):
 @login_required
 def send_reply(request, message_id):
     original_message = get_object_or_404(Message, id=message_id)
-
-    # Upewnij się, że użytkownik ma uprawnienia do odpowiedzi (np. jest odbiorcą oryginalnej wiadomości)
-    if request.user != original_message.receiver:
-        # Możesz tutaj przekierować do strony błędu lub wyświetlić komunikat
-        return redirect('some_error_view')
-
     if request.method == 'POST':
-        form = MessageForm(request.POST)
+        form = ReplyMessageForm(request.POST)
         if form.is_valid():
-            topic = form.cleaned_data['topic']
-            content = form.cleaned_data['content']
-
-            # Tworzenie nowej wiadomości jako odpowiedzi
             reply_message = Message(
                 user=request.user,
                 sender=request.user,
-                receiver=original_message.sender,  # Nadawca oryginalnej wiadomości staje się odbiorcą odpowiedzi
-                topic=topic,
-                content=content,
-                reply_to=original_message  # Ustawienie oryginalnej wiadomości jako wiadomości, na którą odpowiadamy
+                receiver=original_message.sender,
+                content=form.cleaned_data['content'],
+                topic=form.cleaned_data['topic'],
+                reply_to=original_message
             )
             reply_message.save()
-
-            # Przekierowanie do widoku po pomyślnym wysłaniu odpowiedzi
-            return redirect('plemiona:sent_messages')  # Zakładam, że istnieje taki widok
+            return redirect('plemiona:sent_messages')
     else:
-        # Ustawienie domyślnego tematu jako "Re: [temat oryginalnej wiadomości]"
-        form = MessageForm(initial={'topic': 'Re: ' + original_message.topic})
+        form = ReplyMessageForm(initial={'topic': 'Re: ' + original_message.topic})
+        # Dodaj logikę do pobrania poprzednich wiadomości w wątku
 
-    return render(request, 'plemiona/send_message.html', {'form': form})
+    return render(request, 'plemiona/send_reply.html', {'form': form})
+
+
+def user_details(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    villages = Village.objects.filter(user=user)
+    return render(request, 'plemiona/user_details.html', {'user': user, 'villages': villages})

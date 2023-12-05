@@ -1,8 +1,7 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
-<!-- send_message.html -->
+<!-- send_reply.html -->
 
-<!-- send_message.html -->
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
@@ -18,4 +17,6 @@
     {% endfor %}
 </div>
 
+{#    <script src="{% static 'java_styles.js' %}"></script>#}
 {% endblock %}
+

@@ -2,14 +2,14 @@
 {% block content %}
 <!-- received_messages.html -->
 
-<h2>Odebrane Wiadomości</h2>
+<h2>Wiadomości</h2>
 <ul>
     {% for message in messages %}
         <li>
-            Od: {{ message.sender.username }} - {{ message.content }} - {{ message.date }}
+            <a href="{% url 'plemiona:message_detail' message.id %}">{{ message.topic }}</a> - {{ message.date }}
         </li>
     {% empty %}
-        <li>Brak odebranych wiadomości.</li>
+        <li>Brak wiadomości.</li>
     {% endfor %}
 </ul>
 

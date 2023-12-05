@@ -6,7 +6,9 @@
 <ul>
     {% for message in messages %}
         <li>
-            <a href="{% url 'message_detail' message.id %}">{{ message.topic }}</a> - {{ message.date }}
+            <a href="{% url 'plemiona:message_detail' message.id %}">{{ message.topic }}</a> -
+            wysłane do <a href="{% url 'plemiona:user_details' message.receiver.id %}">{{ message.receiver.username }}</a> -
+            {{ message.date }}
         </li>
     {% empty %}
         <li>Brak wiadomości.</li>
@@ -14,3 +16,5 @@
 </ul>
 
 {% endblock %}
+
+

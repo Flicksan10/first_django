@@ -4,6 +4,6 @@
 
 <h2>{{ message.topic }}</h2>
 <p>{{ message.content }}</p>
-<a href="{% url 'send_reply' message.id %}">Odpowiedz</a>
+<a href="{% url 'plemiona:send_reply' message.id %}">Odpowiedz</a>
 
 {% endblock %}

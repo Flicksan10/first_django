@@ -24,6 +24,15 @@
                     <a class="nav-link" href="{% url 'plemiona:get_user_village' %}">Wszystkie wioski</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:send_message' %}">wyslij wiadomosc</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:sent_messages' %}">Wiadomosci wyslane</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:received_messages' %}">otrzymane wiadomosci</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'plemiona:logout' %}">Wyloguj się</a>
                 </li>
             </ul>

@@ -1,6 +1,7 @@
 # w pliku forms.py twojej aplikacji
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+from .models import Message
 
 # Nie musisz niczego dodawać do tej klasy, jeśli używasz standardowego formularza Django,
 # ale możesz ją rozszerzyć, jeśli potrzebujesz niestandardowej logiki.
@@ -25,9 +26,11 @@ class CustomLoginForm(AuthenticationForm):
     # custom_field = forms.CharField(required=False)
 
 
-class MessageForm(forms.Form):
-    receiver = forms.CharField(max_length=100)
-    topic = forms.CharField(max_length=100, label='Temat')
-    content = forms.CharField(widget=forms.Textarea)
-    # to let answer to message
-    reply_to = forms.IntegerField(required=False, widget=forms.HiddenInput())
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['receiver', 'topic', 'content']
+class ReplyMessageForm(MessageForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('receiver')  # Usunięcie pola receiver

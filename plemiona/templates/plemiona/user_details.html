@@ -1,0 +1,17 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<!-- user_details.html -->
+
+<!-- user_details.html -->
+
+<h2>Szczegóły użytkownika: {{ user.username }}</h2>
+<h3>Wioski:</h3>
+<ul>
+    {% for village in villages %}
+        <li>{{ village.village_name }} - Lokalizacja: ({{ village.coordinate_x }}, {{ village.coordinate_y }})</li>
+    {% empty %}
+        <li>Brak wiosek.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
