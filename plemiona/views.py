@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Message
+from .models import Message, Notification
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -451,9 +451,11 @@ def message_detail(request, message_id):
             reply.message = message
             reply.replier = request.user
             reply.save()
+            Notification.objects.filter(user=request.user, message=message).update(is_read=True)
             return redirect('plemiona:message_detail', message_id=message_id)
     else:
         form = MessageThreadForm()
+
 
     return render(request, 'plemiona/message_detail.html', {
         'message': message,
@@ -483,7 +485,11 @@ def send_message(request):
                 content=content
             )
             new_thread_message.save()
-
+            Notification.objects.create(
+                user=new_message.receiver,
+                message=new_message,
+                is_read=False
+            )
             # Przekieruj do strony z wysłanymi wiadomościami
             return redirect('plemiona:messages_all')
     else:
@@ -504,6 +510,11 @@ def reply_to_message(request, message_id):
             reply.message = original_message
             reply.replier = request.user
             reply.save()
+            Notification.objects.create(
+                user=original_message.sender,  # Odbiorca to nadawca oryginalnej wiadomości
+                message=reply,
+                is_read=False
+            )
             Message.objects.filter(id=original_message.id).update(is_read=False)
 
             return redirect('plemiona:sent_messages')
@@ -511,3 +522,9 @@ def reply_to_message(request, message_id):
         form = MessageThreadForm()
 
     return render(request, 'plemiona/send_reply.html', {'form': form, 'original_message': original_message})
+
+
+
+def notifications_view(request):
+    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'plemiona/notifications.html', {'notifications': user_notifications})

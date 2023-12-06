@@ -1,0 +1,17 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<h2>Powiadomienia</h2>
+<ul>
+    {% for notification in notifications %}
+    <li>
+        {% if notification.message %}
+            Nowa wiadomość od {{ notification.message.sender.username }}:
+            <a href="{% url 'plemiona:message_detail' notification.message.id %}">
+                {{ notification.message.subject }}
+            </a>
+        {% endif %}
+        <!-- Możesz dodać obsługę innych typów powiadomień tutaj -->
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

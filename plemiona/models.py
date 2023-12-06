@@ -99,3 +99,15 @@ class MessageThread(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
     # Możesz dodać więcej pól, jeśli potrzebujesz
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Możesz dodać więcej pól, np. typ powiadomienia, jeśli planujesz różne rodzaje powiadomień
+
+    def __str__(self):
+        return f"Powiadomienie dla {self.user.username}"
+

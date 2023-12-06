@@ -32,7 +32,7 @@ urlpatterns = [
     path('messages/reply/<int:message_id>/', views.reply_to_message, name='reply_to_message'),
     path('send_message/', views.send_message, name='send_message'),
     path('reply_to_message/<int:message_id>/', views.reply_to_message, name='reply_to_message'),
-
+    path('notifications/', views.notifications_view, name='notifications_view'),
 
 ]
 # #
