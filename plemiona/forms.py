@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from .models import Message
-
+from .models import MessageThread
 # Nie musisz niczego dodawać do tej klasy, jeśli używasz standardowego formularza Django,
 # ale możesz ją rozszerzyć, jeśli potrzebujesz niestandardowej logiki.
 # class UserLoginForm(AuthenticationForm):
@@ -29,8 +29,14 @@ class CustomLoginForm(AuthenticationForm):
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ['receiver', 'topic', 'content']
-class ReplyMessageForm(MessageForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.pop('receiver')  # Usunięcie pola receiver
+        fields = ['receiver', 'subject', 'content']
+        # 'content' to pole, które możesz dodać do modelu Message, jeśli chcesz przechowywać treść inicjalnej wiadomości
+from .models import MessageThread
+
+
+
+class MessageThreadForm(forms.ModelForm):
+    class Meta:
+        model = MessageThread
+        fields = ['content']
+        # 'content' to pole w modelu MessageThread, które przechowuje treść odpowiedzi

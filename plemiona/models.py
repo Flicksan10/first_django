@@ -85,13 +85,15 @@ class Reports(models.Model):
 
 
 class Message(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
-    reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
-    content = models.TextField(default='brak tresci')  # Upewnij się, że to pole istnieje
-    topic = models.CharField(max_length=100,default='Brak tematu')
+    subject = models.CharField(max_length=100)
+    date = models.DateTimeField(auto_now_add=True)
+    # Możesz dodać więcej pól, jeśli potrzebujesz
 
-    def __str__(self):
-        return f"Message from {self.sender.username} to {self.receiver.username} on {self.date}"
+class MessageThread(models.Model):
+    message = models.ForeignKey(Message, related_name='replies', on_delete=models.CASCADE)
+    replier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    # Możesz dodać więcej pól, jeśli potrzebujesz

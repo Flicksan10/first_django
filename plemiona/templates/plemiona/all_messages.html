@@ -6,7 +6,6 @@
             <th>Autor</th>
             <th>Odbiorca</th>
             <th>Temat</th>
-            <th>Treść</th>
             <th>Data</th>
             <th>Odpowiedz/Wejdź w wątek</th>
             <th>Ilość wiadomości w wątku</th>
@@ -18,7 +17,6 @@
                 <td>{{ message.sender.username }}</td>
                 <td>{{ message.receiver.username }}</td>
                 <td>{{ message.topic }}</td>
-                <td>{{ message.content }}</td>
                 <td>{{ message.date }}</td>
                 <td>{% if message.thread %}
                     <a href="{% url 'plemiona:message_detail' message.thread.id %}">Odpowiedz/Wejdź w wątek</a>
