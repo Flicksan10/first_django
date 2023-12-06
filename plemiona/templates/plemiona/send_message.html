@@ -1,21 +1,12 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
-<!-- send_message.html -->
-
-<!-- send_message.html -->
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Wyślij</button>
 </form>
 
-<h3>Poprzednie Wiadomości:</h3>
-<div>
-    {% for message in previous_messages %}
-        <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
-    {% empty %}
-        <p>Brak poprzednich wiadomości.</p>
-    {% endfor %}
-</div>
 
+{#    <script src="{% static 'java_styles.js' %}"></script>#}
 {% endblock %}
+

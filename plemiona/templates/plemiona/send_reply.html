@@ -1,24 +1,11 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
-<!-- send_reply.html -->
+<h2>Odpowiedz na wiadomość: {{ original_message.subject }}</h2>
 
-<!-- send_reply.html -->
-
-<div class="message-thread">
-    {% for message in thread %}
-        <div class="message">
-            <p><strong>{{ message.sender.username }}:</strong> {{ message.content }}</p>
-        </div>
-    {% endfor %}
-</div>
-
-<!-- Formularz odpowiedzi -->
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Odpowiedz</button>
+    <button type="submit">Wyślij odpowiedź</button>
 </form>
-
-{#    <script src="{% static 'java_styles.js' %}"></script>#}
 {% endblock %}
 

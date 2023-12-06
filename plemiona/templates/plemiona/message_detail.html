@@ -1,21 +1,28 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
-<!-- received_messages.html -->
+<div class="container">
+    <h2 class="mt-4"> Temat: {{ message.subject }}</h2>
 
-<!-- message_detail.html -->
-
-    <h2>{{ message.topic }}</h2>
-    <p>{{ message.content }}</p>
-    <a href="{% url 'plemiona:send_reply' message.id %}">Odpowiedz</a>
-
-    <hr>
-    <h3>Historia Konwersacji:</h3>
     <div class="message-thread">
-        {% for msg in thread %}
-            <div class="message">
-                <p><strong>{{ msg.sender.username }}:</strong> {{ msg.content }}</p>
+        {% for reply in thread %}
+            <div class="message {{ forloop.counter0|divisibleby:2|yesno:'odd,even' }}">
+                <strong>{{ reply.replier.username }}</strong>
+                {% if reply.content %}
+                    <small class="text-muted">{{ reply.date }}</small>
+                {% endif %}
+                <p>{{ reply.content }}</p>
+
             </div>
         {% endfor %}
     </div>
 
+    <form method="post" class="reply-form mt-4">
+        {% csrf_token %}
+        <div class="form-group">
+{#            {{ form.content.label_tag }}#}
+            {{ form.content }}
+        </div>
+        <button type="submit" class="btn btn-primary">Wyślij odpowiedź</button>
+    </form>
+</div>
 {% endblock %}
