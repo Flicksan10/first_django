@@ -9,6 +9,7 @@
             <a href="{% url 'plemiona:message_detail' notification.message.id %}">
                 {{ notification.message.subject }}
             </a>
+            <p>Data: {{ notification.created_at }}</p>
         {% endif %}
         <!-- Możesz dodać obsługę innych typów powiadomień tutaj -->
     </li>

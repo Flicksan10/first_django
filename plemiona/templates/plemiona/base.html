@@ -29,9 +29,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'plemiona:messages_all' %}">wszystkie wiadomości</a>
                 </li>
-                <li class="nav-item">
-                <a class="nav-link" href="{% url 'plemiona:notifications_view' %}">Powiadomienia</a>
-                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'plemiona:notifications_view' %}">
+                            Powiadomienia <span class="badge badge-light">{{ unread_notifications_count }}</span>
+                        </a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'plemiona:logout' %}">Wyloguj się</a>
                 </li>

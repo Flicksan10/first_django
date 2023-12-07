@@ -526,5 +526,18 @@ def reply_to_message(request, message_id):
 
 
 def notifications_view(request):
-    user_notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    user_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
     return render(request, 'plemiona/notifications.html', {'notifications': user_notifications})
+
+
+
+# def notification_view(request, notification_id):
+#     notification = get_object_or_404(Notification, id=notification_id)
+#
+#     # If the user clicking the notification is the receiver, mark the notification as read
+#     if request.user == notification.user:
+#         notification.is_read = True
+#         notification.save()
+#
+#     # Redirect the user to the desired page (e.g., the message related to the notification)
+#     return redirect('plemiona:message_detail', message_id=notification.message.id)

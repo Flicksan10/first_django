@@ -1,6 +1,7 @@
 from django.db import models, IntegrityError
 from django.conf import settings
 import random
+from django.contrib.auth.models import User
 
 from django import forms
 
@@ -98,6 +99,7 @@ class MessageThread(models.Model):
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    last_notification_receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='last_notification_receiver', null=True)
     # Możesz dodać więcej pól, jeśli potrzebujesz
 
 

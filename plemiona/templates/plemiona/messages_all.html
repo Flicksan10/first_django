@@ -21,10 +21,10 @@
                 <td>{{ message.date }}</td>
                 <td>{{ message.subject }}</td>
                 <td>
-                    {% if message.is_read %}
-                        <span class="badge badge-success">Odczytana</span>
+                    {% if message.last_notification_receiver == request.user %}
+                        <span class="badge badge-success"> {{message.last_notification_receiver}}--{{ request.user }} --odczytana</span>
                     {% else %}
-                        <span class="badge badge-warning">Nieodczytana</span>
+                        <span class="badge badge-warning">{{message.last_notification_receiver}}--{{ request.user }} --Nieodczytana</span>
                     {% endif %}
                 </td>
                 <td><a href="{% url 'plemiona:message_detail' message.id %}" class="btn btn-primary btn-sm">Wejdź</a></td>
