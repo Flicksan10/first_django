@@ -19,10 +19,6 @@ def update_resources():
         village.wood += wood_increase
         village.clay += clay_increase
         village.iron += iron_increase
-        # village.wood += 50000
-        # village.clay += 50000
-        # village.iron += 50000
-        # print(village.wood)
         village.save()
 
 def get_performance(level, building_type, resource_data):
@@ -30,11 +26,11 @@ def get_performance(level, building_type, resource_data):
 
     if building_type == 'sawmill':
         # print(resource_data[level]["performance"])
-        data = resource_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 360
     elif building_type == 'clay_pit':
-        data = resource_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 360
     elif building_type == 'iron_mine':
-        data = resource_data[level]["performance"] / 6
+        data = resource_data[level]["performance"] / 360
     else:
         raise ValueError("Nieznany typ budynku")
 

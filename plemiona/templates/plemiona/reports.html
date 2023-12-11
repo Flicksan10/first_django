@@ -1,0 +1,35 @@
+{% extends 'plemiona/base.html' %}
+
+{% block content %}
+    <h2>Reports</h2>
+    <table>
+        <tr>
+            <th>Attacker User</th>
+            <th>Defender User</th>
+            <th>Village Attacker</th>
+            <th>Village Defender</th>
+            <th>Attacker Army</th>
+            <th>Defender Army</th>
+            <th>Result</th>
+            <th>Winner</th>
+            <th>Loser</th>
+            <th>Zrabowane zasoby</th>
+            <th>Date Created</th>
+        </tr>
+        {% for report in reports %}
+            <tr>
+                <td>{{ report.attacker_user }}</td>
+                <td>{{ report.defender_user }}</td>
+                <td>{{ report.village_attacker }}</td>
+                <td>{{ report.village_defender }}</td>
+                <td>{{ report.attacker_army }}</td>
+                <td>{{ report.defender_army }}</td>
+                <td>{{ report.result }}</td>
+                <td>{{ report.winner }}</td>
+                <td>{{ report.loser }}</td>
+                <td>{{ report.loot }}</td>
+                <td>{{ report.date_created }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

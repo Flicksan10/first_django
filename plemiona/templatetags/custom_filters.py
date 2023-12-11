@@ -19,3 +19,10 @@ def calculate_performance(level, building_type):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+import math
+
+
+@register.filter
+def floor(value):
+    return math.floor(value)

@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Topic_message, Notification, Answers_Message
+from .models import Topic_message, Notification, Answers_Message, Reports
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -29,7 +29,7 @@ from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.loot_from_village import calculate_loot
 from .buildings_data.buildings import buildings_data_dict
 from .tasks import update_resources
-
+from django.contrib import messages
 
 # class UserLoginView(LoginView):
 #     # ... twoja konfiguracja klasy ...
@@ -360,7 +360,11 @@ def attack_view(request, village_id):
                 quantity = int(request.POST.get(key, 0))  # Pobranie ilości jednostek
                 if quantity > 0:
                     units_to_attack[unit_name] = quantity
-
+        for unit, quantity in units_to_attack.items():
+            if getattr(attacker_village, unit, 0) < quantity:
+                # If not, redirect back to the 'place_view' with an error message
+                messages.error(request, f'Not enough {unit} in the attacking village.')
+                return redirect('plemiona:place_view', village_id=village_id)
         print("Wspolrzedne X i Y:", x_coordinate, y_coordinate)
         print("Jednostki do ataku:", units_to_attack)
 
@@ -369,9 +373,9 @@ def attack_view(request, village_id):
         defender_units = {unit: getattr(defender_village, unit,0) for unit in unit_names }
         defender_units = {k: v for k, v in defender_units.items() if v != 0}
         print("Jednostki w wiosce obroncy:", defender_units)
-        defender_units={"halberdiers": 8,'archer':15}
-        units_to_attack = {"axeman": 100, 'light_cavalry': 5}
-        battle_result = {'axeman': 80, 'light_cavalry': 4}
+        # defender_units={"halberdiers": 8,'archer':15}
+        # units_to_attack = {"axeman": 100, 'light_cavalry': 5}
+        # battle_result = {'axeman': 80, 'light_cavalry': 4}
         winner,battle_result = simulate_battle(units_to_attack, defender_units, army_data)
         # Aktualizacja danych po walce
         print(winner,battle_result)
@@ -383,6 +387,7 @@ def attack_view(request, village_id):
     else:
         return render(request, 'attack_form.html', {'village_id': village_id})
         print("nie udalo sie")
+
 
 
 from django.db import transaction
@@ -403,7 +408,7 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
             for unit, count in defender_units.items():
                 current_count = getattr(defender_village, unit, 0)
                 setattr(defender_village, unit, max(current_count - count, 0))
-            calculate_loot(battle_result, army_data, defender_village,attacker_village)
+            loot=calculate_loot(battle_result, army_data, defender_village,attacker_village)
         else:
             # Obrońca wygrywa
             for unit, count in units_to_attack.items():
@@ -414,11 +419,51 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
                 loss = count - battle_result.get(unit, 0)
                 current_count = getattr(defender_village, unit, 0)
                 setattr(defender_village, unit, max(current_count - loss, 0))
-
+        save_battle_report(attacker_village.id,defender_village.id,units_to_attack,defender_units, winner,battle_result,loot)
         # Zapisz zmiany w bazie danych
         attacker_village.save()
         defender_village.save()
 
+
+def save_battle_report(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner,
+                       battle_result, loot= {} ):
+    # Retrieve the village instances
+    attacker_village = Village.objects.get(id=attacker_village_id)
+    defender_village = Village.objects.get(id=defender_village_id)
+
+    # Determine the winner and loser
+    if winner == 'attacker':
+        winner_user = attacker_village.user
+        loser_user = defender_village.user
+    else:
+        winner_user = defender_village.user
+        loser_user = attacker_village.user
+
+    # Create a new Reports instance
+    report = Reports(
+        attacker_user=attacker_village.user,
+        defender_user=defender_village.user,
+        village_attacker=attacker_village,
+        village_defender=defender_village,
+        attacker_army=units_to_attack,
+        defender_army=defender_units,
+        result=battle_result,
+        winner=winner_user,
+        loser=loser_user,
+        loot=loot,
+    )
+
+    # Save the Reports instance
+    report.save()
+
+    return report
+
+def reports_view(request):
+    # Retrieve all reports from the database
+    reports = Reports.objects.all()
+
+    # Pass the reports to the template
+    return render(request, 'plemiona/reports.html', {'reports': reports})
 # -------------------------messages_logic------------------------------------------------
 def messages_all(request):
     topic_messages_query = Topic_message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-date')

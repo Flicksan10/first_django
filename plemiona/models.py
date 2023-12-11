@@ -4,6 +4,7 @@ import random
 from django.contrib.auth.models import User
 
 from django import forms
+from django.utils import timezone
 
 
 class Village(models.Model):
@@ -18,9 +19,9 @@ class Village(models.Model):
     light_cavalry = models.IntegerField(default=0)
     archer_cavalry = models.IntegerField(default=0)
     heavy_cavalry = models.IntegerField(default=0)
-    wood = models.IntegerField(default=1000)
-    iron = models.IntegerField(default=1000)
-    clay = models.IntegerField(default=1000)
+    wood = models.FloatField(default=1000)
+    iron = models.FloatField(default=1000)
+    clay = models.FloatField(default=1000)
     town_hall = models.IntegerField(default=1)
     barracks = models.IntegerField(default=0)
     granary = models.IntegerField(default=1)
@@ -68,21 +69,34 @@ class Village(models.Model):
 #         return self.choice_text
 
 class Reports(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     report_type = models.CharField(max_length=100)
-    attacker = models.CharField(max_length=100)
-    defender = models.CharField(max_length=100)
-    village_attacker_name = models.CharField(max_length=100)
-    village_defender_name = models.CharField(max_length=100)
-    result = models.CharField(max_length=100)
-    village_attacker_coordinates_x = models.IntegerField()
-    village_attacker_coordinates_y = models.IntegerField()
-    village_defender_coordinates_x = models.IntegerField()
-    village_defender_coordinates_y = models.IntegerField()
-    details = models.CharField(max_length=1000)
+
+    # Użytkownicy biorący udział w walce
+    attacker_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='attacker_reports', on_delete=models.CASCADE)
+    defender_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='defender_reports', on_delete=models.CASCADE)
+
+    # Wioski biorące udział w walce
+    village_attacker = models.ForeignKey(Village, related_name='attacker_village_reports', on_delete=models.CASCADE)
+    village_defender = models.ForeignKey(Village, related_name='defender_village_reports', on_delete=models.CASCADE)
+
+    # Armie i wynik
+    attacker_army = models.JSONField(default=dict)
+    defender_army = models.JSONField(default=dict)
+    result = models.JSONField(default=dict)
+    loot = models.JSONField(default=dict)
+
+    # Zwycięzca
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='won_reports', on_delete=models.CASCADE, null=True, blank=True)
+    loser = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='lost_reports', on_delete=models.CASCADE,
+                              null=True, blank=True)
+
+    details = models.CharField(max_length=1000, default="brak")
+    date_created = models.DateTimeField(default=timezone.now)
+
     def __str__(self):
-        return f"Report {self.id} by {self.user.username}"
+        return f"Report {self.id} by {self.attacker_user.username} vs {self.defender_user.username}"
+
 
 
 class Topic_message(models.Model):
