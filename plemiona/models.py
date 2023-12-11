@@ -85,16 +85,18 @@ class Reports(models.Model):
         return f"Report {self.id} by {self.user.username}"
 
 
-class Message(models.Model):
+class Topic_message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
     subject = models.CharField(max_length=100, default='New Message')
     date = models.DateTimeField(auto_now_add=True)
-    is_read = models.BooleanField(default=False)
+    is_readed_sender = models.BooleanField(default=True)
+    is_readed_receiver = models.BooleanField(default=False)
+
     # Możesz dodać więcej pól, jeśli potrzebujesz
 
-class MessageThread(models.Model):
-    message = models.ForeignKey(Message, related_name='replies', on_delete=models.CASCADE)
+class Answers_Message(models.Model):
+    topic_message = models.ForeignKey(Topic_message, related_name='replies', on_delete=models.CASCADE)
     replier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
@@ -105,7 +107,7 @@ class MessageThread(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    message = models.ForeignKey(Message, on_delete=models.CASCADE, null=True, blank=True)
+    message = models.ForeignKey(Topic_message, on_delete=models.CASCADE, null=True, blank=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     # Możesz dodać więcej pól, np. typ powiadomienia, jeśli planujesz różne rodzaje powiadomień

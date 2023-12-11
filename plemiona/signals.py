@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
-from .models import Village, MessageThread, Notification
+from .models import Village, Answers_Message, Notification
 from django.contrib.auth.models import User
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -10,15 +10,15 @@ def create_village_for_new_user(sender, instance, created, **kwargs):
         Village.objects.create(user=instance)
 
 
-@receiver(post_save, sender=MessageThread)
+@receiver(post_save, sender=Answers_Message)
 def create_notification_on_reply(sender, instance, created, **kwargs):
     if created:
         # Determine who should receive the notification
-        recipient = instance.message.receiver if instance.replier == instance.message.sender else instance.message.sender
+        recipient = instance.topic_message.receiver if instance.replier == instance.topic_message.sender else instance.topic_message.sender
 
         Notification.objects.create(
             user=recipient,  # The user who will receive the notification
-            message=instance.message,
+            message=instance.topic_message,
             is_read=False
         )
 

@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Message, Notification
+from .models import Topic_message, Notification, Answers_Message
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -421,44 +421,73 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
 
 # -------------------------messages_logic------------------------------------------------
 def messages_all(request):
-    # Pobierz wszystkie wiadomości, w których użytkownik jest nadawcą lub odbiorcą
-    messages = Message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).distinct().order_by('-date')
+    topic_messages_query = Topic_message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-date')
 
-    return render(request, 'plemiona/messages_all.html', {'messages': messages})
+    # Tworzenie słownika zawierającego informacje o wiadomościach i ich statusie odczytu
+    topic_messages = {}
+    for message in topic_messages_query:
+        is_sender = message.sender == request.user
+        is_readed = message.is_readed_sender if is_sender else message.is_readed_receiver
+        topic_messages[message.id] = {
+            'message': message,
+            'is_sender': is_sender,
+            'is_readed': is_readed
+        }
 
-def get_message_thread(message):
+    return render(request, 'plemiona/messages_all.html', {'topic_messages': topic_messages})
+
+def get_message_thread(topic_message):
     # Rozpoczynamy od pierwszej wiadomości w wątku
-    thread = [message]
+    thread = [topic_message]
 
     # Pobieramy wszystkie odpowiedzi (MessageThread) na tę wiadomość
-    replies = MessageThread.objects.filter(message=message).order_by('date')
+    replies = Answers_Message.objects.filter(topic_message=topic_message).order_by('date')
     for reply in replies:
         thread.append(reply)
 
     return thread
 
 def message_detail(request, message_id):
-    message = get_object_or_404(Message, id=message_id)
-    if request.user == message.receiver and not message.is_read:
-        message.is_read = True
-        message.save()
-    thread = get_message_thread(message)
+    topic_message = get_object_or_404(Topic_message, id=message_id)
+    original_message = topic_message
+
+    if request.user == topic_message.sender:
+        topic_message.is_readed_sender = True
+        print("dobiorca",topic_message.is_readed_sender)
+    elif request.user == topic_message.receiver:
+        topic_message.is_readed_receiver = True
+        print("nadawca",topic_message.is_readed_receiver)
+
+    # Zapisz zmiany w Topic_message
+    topic_message.save()
+    thread = get_message_thread(topic_message)
 
     if request.method == 'POST':
         form = MessageThreadForm(request.POST)
         if form.is_valid():
             reply = form.save(commit=False)
-            reply.message = message
+            reply.topic_message = topic_message
             reply.replier = request.user
             reply.save()
-            Notification.objects.filter(user=request.user, message=message).update(is_read=True)
+            if request.user == original_message.sender:
+                original_message.is_readed_sender = True
+                original_message.is_readed_receiver = False
+                print("zmieniam status jako  original_message.sender")
+            else:
+                original_message.is_readed_sender = False
+                original_message.is_readed_receiver = True
+                print("zmieniam status jako  reciver")
+
+            original_message.save()
+            print("nastapil zapis")
+            # Notification.objects.filter(user=request.user, message=topic_message).update(is_read=True)
             return redirect('plemiona:message_detail', message_id=message_id)
     else:
         form = MessageThreadForm()
 
 
     return render(request, 'plemiona/message_detail.html', {
-        'message': message,
+        'topic_message': topic_message,
         'thread': thread,
         'form': form
     })
@@ -471,23 +500,24 @@ def send_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            # Tworzymy nową wiadomość (Message)
-            new_message = form.save(commit=False)
-            new_message.sender = request.user
-            new_message.is_read = False  # Ustawienie is_read na False
-            new_message.save()
+            # Tworzymy nową wiadomość (Topic_message)
+            new_topic_message = form.save(commit=False)
+            new_topic_message.sender = request.user
+            new_topic_message.is_readed_receiver = False  # Ustawienie is_read na False
+            new_topic_message.is_readed_sender = True  # Ustawienie is_read na False
+            new_topic_message.save()
 
             # Tworzymy pierwszą odpowiedź w wątku (MessageThread)
             content = form.cleaned_data['content']  # Pobieramy treść z formularza
-            new_thread_message = MessageThread(
-                message=new_message,
+            new_answers_message = Answers_Message(
+                topic_message=new_topic_message,
                 replier=request.user,
                 content=content
             )
-            new_thread_message.save()
+            new_answers_message.save()
             Notification.objects.create(
-                user=new_message.receiver,
-                message=new_message,
+                user=new_topic_message.receiver,
+                message=new_topic_message,
                 is_read=False
             )
             # Przekieruj do strony z wysłanymi wiadomościami
@@ -497,32 +527,8 @@ def send_message(request):
 
     return render(request, 'plemiona/send_message.html', {'form': form})
 
-from .models import Message, MessageThread
+from .models import Topic_message, Answers_Message
 from .forms import MessageThreadForm
-@login_required
-def reply_to_message(request, message_id):
-    original_message = get_object_or_404(Message, id=message_id)
-
-    if request.method == 'POST':
-        form = MessageThreadForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.message = original_message
-            reply.replier = request.user
-            reply.save()
-            Notification.objects.create(
-                user=original_message.sender,  # Odbiorca to nadawca oryginalnej wiadomości
-                message=reply,
-                is_read=False
-            )
-            Message.objects.filter(id=original_message.id).update(is_read=False)
-
-            return redirect('plemiona:sent_messages')
-    else:
-        form = MessageThreadForm()
-
-    return render(request, 'plemiona/send_reply.html', {'form': form, 'original_message': original_message})
-
 
 
 def notifications_view(request):
@@ -531,13 +537,3 @@ def notifications_view(request):
 
 
 
-# def notification_view(request, notification_id):
-#     notification = get_object_or_404(Notification, id=notification_id)
-#
-#     # If the user clicking the notification is the receiver, mark the notification as read
-#     if request.user == notification.user:
-#         notification.is_read = True
-#         notification.save()
-#
-#     # Redirect the user to the desired page (e.g., the message related to the notification)
-#     return redirect('plemiona:message_detail', message_id=notification.message.id)

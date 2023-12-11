@@ -1,8 +1,6 @@
 # w pliku forms.py twojej aplikacji
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Message
-from .models import MessageThread
 # Nie musisz niczego dodawać do tej klasy, jeśli używasz standardowego formularza Django,
 # ale możesz ją rozszerzyć, jeśli potrzebujesz niestandardowej logiki.
 # class UserLoginForm(AuthenticationForm):
@@ -27,24 +25,24 @@ class CustomLoginForm(AuthenticationForm):
 
 
 from django import forms
-from .models import Message
+from .models import Topic_message
 
 class MessageForm(forms.ModelForm):
     content = forms.CharField(widget=forms.Textarea, label='content_label')
 
     class Meta:
-        model = Message
+        model = Topic_message
         fields = ['receiver', 'subject']
 
 
 
 
 from django import forms
-from .models import MessageThread
+from .models import Answers_Message
 
 class MessageThreadForm(forms.ModelForm):
     class Meta:
-        model = MessageThread
+        model = Answers_Message
         fields = ['content']
 
 

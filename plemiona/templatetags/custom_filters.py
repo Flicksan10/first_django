@@ -15,3 +15,7 @@ def calculate_performance(level, building_type):
     building_data = buildings_data_dict.get(building_type, {})
     current_lvl_data = building_data.get(level, {})
     return current_lvl_data.get('performance', 0)
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

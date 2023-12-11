@@ -29,9 +29,7 @@ urlpatterns = [
     path('attack_view/<int:village_id>/', views.attack_view, name='attack_view'),
     path('messages/all/', views.messages_all, name='messages_all'),
     path('messages/<int:message_id>/', views.message_detail, name='message_detail'),
-    path('messages/reply/<int:message_id>/', views.reply_to_message, name='reply_to_message'),
     path('send_message/', views.send_message, name='send_message'),
-    path('reply_to_message/<int:message_id>/', views.reply_to_message, name='reply_to_message'),
     path('notifications/', views.notifications_view, name='notifications_view'),
 
 ]

@@ -14,22 +14,22 @@
             </tr>
         </thead>
         <tbody>
-            {% for message in messages %}
-            <tr>
-                <td>{{ message.sender }}</td>
-                <td>{{ message.receiver }}</td>
-                <td>{{ message.date }}</td>
-                <td>{{ message.subject }}</td>
-                <td>
-                    {% if message.last_notification_receiver == request.user %}
-                        <span class="badge badge-success"> {{message.last_notification_receiver}}--{{ request.user }} --odczytana</span>
-                    {% else %}
-                        <span class="badge badge-warning">{{message.last_notification_receiver}}--{{ request.user }} --Nieodczytana</span>
-                    {% endif %}
-                </td>
-                <td><a href="{% url 'plemiona:message_detail' message.id %}" class="btn btn-primary btn-sm">Wejdź</a></td>
-            </tr>
-            {% endfor %}
+            {% for message_id, message_info in topic_messages.items %}
+    <tr>
+        <td>{{ message_info.message.sender }}</td>
+        <td>{{ message_info.message.receiver }}</td>
+        <td>{{ message_info.message.date }}</td>
+        <td>{{ message_info.message.subject }}</td>
+        <td>
+            {% if message_info.is_readed %}
+                <span class="badge badge-success">Odczytana</span>
+            {% else %}
+                <span class="badge badge-warning">Nieodczytana</span>
+            {% endif %}
+        </td>
+        <td><a href="{% url 'plemiona:message_detail' message_id %}" class="btn btn-primary btn-sm">Wejdź</a></td>
+    </tr>
+{% endfor %}
         </tbody>
     </table>
 </div>
