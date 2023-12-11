@@ -24,10 +24,13 @@
                     <a class="nav-link" href="{% url 'plemiona:get_user_village' %}">Wszystkie wioski</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'plemiona:send_message' %}">wyslij wiadomosc</a>
+                    <a class="nav-link" href="{% url 'plemiona:send_message' %}">Wyslij wiadomosc</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'plemiona:messages_all' %}">wszystkie wiadomości</a>
+                    <a class="nav-link" href="{% url 'plemiona:messages_all' %}">Wszystkie wiadomości</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'plemiona:reports' %}">Raporty</a>
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
@@ -52,7 +55,7 @@
             <div class="container mt-4">
                 <table class="table">
                 <tr>
-                    <th>Nazwa Wioski</th>
+                    <th>Wioska</th>
                     <th>Koordynaty</th>
                     <th>Drewno</th>
                     <th>Glina</th>
@@ -64,11 +67,11 @@
                     <!-- Możesz dodać więcej kolumn zgodnie z potrzebami -->
                 </tr>
                 <tr>
-                    <td>{{ active_village.village_name }}</td>
+                    <td><a href="{% url 'plemiona:village_detail' active_village.id %}">{{ active_village.village_name }}</a></td>
                     <td>({{ active_village.coordinate_x }}, {{ active_village.coordinate_y }})</td>
-                    <td>{{ active_village.wood }}</td>
-                    <td>{{ active_village.clay }}</td>
-                    <td>{{ active_village.iron }}</td>
+                    <td>{{ active_village.wood|floor }}</td>
+                    <td>{{ active_village.clay|floor }}</td>
+                    <td>{{ active_village.iron|floor }}</td>
                     <td>{{ active_village.sawmill|calculate_performance:'sawmill' }}/h</td>
                     <td>{{ active_village.clay_pit|calculate_performance:'clay_pit' }}/h</td>
                     <td>{{ active_village.iron_mine|calculate_performance:'iron_mine' }}/h</td>

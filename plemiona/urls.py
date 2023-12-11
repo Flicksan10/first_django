@@ -31,6 +31,7 @@ urlpatterns = [
     path('messages/<int:message_id>/', views.message_detail, name='message_detail'),
     path('send_message/', views.send_message, name='send_message'),
     path('notifications/', views.notifications_view, name='notifications_view'),
+    path('reports/', views.reports_view, name='reports'),
 
 ]
 # #

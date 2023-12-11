@@ -4,11 +4,12 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'style.css' %}">
 <h3>{{ village.village_name }}</h3>
-{% if missing_resources_units %}
-  <div class="missing-resources">
-    <strong>Brakuje:</strong> {{ missing_resources_units|join:", " }}
-  </div>
-{% endif %}
+
+    {% for message in messages %}
+        <div class="missing-resources">
+            Za mało jednostek
+        </div>
+    {% endfor %}
 
 <form action="{% url 'plemiona:attack_view' village.id %}" method="post">
   {% csrf_token %}

@@ -1,5 +1,6 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
+    {% load custom_filters %}
     <link rel="stylesheet" href="../../static/style.css">
     <h2>Twoje wioski</h2>
     {% if villages %}
@@ -41,9 +42,9 @@
                         <td>{{ village.halberdiers }}</td>
                         <td>{{ village.archer }}</td>
                         <td>{{ village.axeman }}</td>
-                        <td>{{ village.wood }}</td>
-                        <td>{{ village.iron }}</td>
-                        <td>{{ village.clay }}</td>
+                        <td>{{ village.wood|floor }}</td>
+                        <td>{{ village.iron|floor }}</td>
+                        <td>{{ village.clay|floor }}</td>
                         <td>{{ village.granary }}</td>
                         <td>{{ village.farm }}</td>
                         <td>{{ village.sawmill }}</td>

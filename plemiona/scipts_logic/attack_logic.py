@@ -1,5 +1,6 @@
 from plemiona.army_data import army_data
 import random
+import cProfile
 
 
 # obliczenie ataku i stosunku sił(infrantry,cavalry,archer) jednostek, które atakują
@@ -30,7 +31,7 @@ def calculate_attack_distribution(attacker_units, army_data):
     return attack_distribution
 
 # opytmalizacja jednostek, które będa sie bronic, ten algorytm jest do poprawy bo dziala strasznie dziwnie
-def optimize_defense_distribution(defender_units, attack_distribution, army_data, iterations=10000):
+def optimize_defense_distribution(defender_units, attack_distribution, army_data, iterations=1):
     best_defense_distribution = None
     best_defense_score = -1
 
@@ -177,19 +178,21 @@ def simulate_battle(attacker_units, defender_units, army_data):
 
     # Sprawdzenie, która strona wygrała
     if attacker_units:
-        print("attackers won units left:", attacker_units)
+        # print("attackers won units left:", attacker_units)
         winner = 'attacker'
         return winner,attacker_units
     else:
-        print("defenders won units left:", defender_units)
+        # print("defenders won units left:", defender_units)
         winner = 'defender'
         return winner,defender_units
 
-# attacker_units = {"axeman": 100,'light_cavalry':5}
-# defender_units = {"halberdiers": 8,'archer':15}
-# Przykładowe wywołanie funkcji
-
-
-# wynik,jednostki=simulate_battle(attacker_units, defender_units, army_data)
+# attacker_units = {"axeman": 100, 'light_cavalry': 5,'archer_cavalry': 15,'heavy_cavalry': 5}
+# defender_units = {'pikemen':55, 'archer': 15,'heavy_cavalry':10,"halberdiers": 82}
 #
+# # Przykładowe wywołanie funkcji
+#
+#
+# wynik, jednostki = simulate_battle(attacker_units, defender_units, army_data)
 # print(wynik,jednostki)
+#
+
