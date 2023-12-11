@@ -9,8 +9,7 @@ app_name = "plemiona"
 # urlpatterns = [
 #     path('', village_list, name='village_list'),
 # ]
-from .views import get_user_village, register, create_village_for_user, CustomLoginView, send_message, \
-    received_messages_view, sent_messages_view, message_detail, send_reply, user_details, all_messages_view
+from .views import get_user_village, register, create_village_for_user, CustomLoginView, send_message
 
 urlpatterns = [
     path('admin/create_village/', views.admin_create_village, name='admin_create_village'),
@@ -28,13 +27,10 @@ urlpatterns = [
     path('recruit_units/<int:village_id>/', views.recruit_units, name='recruit_units'),
     path('place/<int:village_id>/', views.place_view, name='place_view'),
     path('attack_view/<int:village_id>/', views.attack_view, name='attack_view'),
-    path('send_message/', send_message, name='send_message'),
-    path('messages/sent/', sent_messages_view, name='sent_messages'),
-    path('messages/received/', received_messages_view, name='received_messages'),
-    path('messages/<int:message_id>/', message_detail, name='message_detail'),
-    path('messages/reply/<int:message_id>/', send_reply, name='send_reply'),
-    path('user/<int:user_id>/', user_details, name='user_details'),
-    path('messages/all/', all_messages_view, name='all_messages_view'),
+    path('messages/all/', views.messages_all, name='messages_all'),
+    path('messages/<int:message_id>/', views.message_detail, name='message_detail'),
+    path('send_message/', views.send_message, name='send_message'),
+    path('notifications/', views.notifications_view, name='notifications_view'),
 
 ]
 # #

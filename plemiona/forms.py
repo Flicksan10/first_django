@@ -1,8 +1,6 @@
 # w pliku forms.py twojej aplikacji
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Message
-
 # Nie musisz niczego dodawać do tej klasy, jeśli używasz standardowego formularza Django,
 # ale możesz ją rozszerzyć, jeśli potrzebujesz niestandardowej logiki.
 # class UserLoginForm(AuthenticationForm):
@@ -26,11 +24,26 @@ class CustomLoginForm(AuthenticationForm):
     # custom_field = forms.CharField(required=False)
 
 
+from django import forms
+from .models import Topic_message
+
 class MessageForm(forms.ModelForm):
+    content = forms.CharField(widget=forms.Textarea, label='content_label')
+
     class Meta:
-        model = Message
-        fields = ['receiver', 'topic', 'content']
-class ReplyMessageForm(MessageForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.pop('receiver')  # Usunięcie pola receiver
+        model = Topic_message
+        fields = ['receiver', 'subject']
+
+
+
+
+from django import forms
+from .models import Answers_Message
+
+class MessageThreadForm(forms.ModelForm):
+    class Meta:
+        model = Answers_Message
+        fields = ['content']
+
+
+        # 'content' to pole w modelu MessageThread, które przechowuje treść odpowiedzi

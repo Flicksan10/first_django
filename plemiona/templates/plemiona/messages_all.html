@@ -1,0 +1,36 @@
+{% extends "plemiona/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Wszystkie wiadomości</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nadawca</th>
+                <th>Odbiorca</th>
+                <th>Data</th>
+                <th>Temat</th>
+                <th>Status</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message_id, message_info in topic_messages.items %}
+    <tr>
+        <td>{{ message_info.message.sender }}</td>
+        <td>{{ message_info.message.receiver }}</td>
+        <td>{{ message_info.message.date }}</td>
+        <td>{{ message_info.message.subject }}</td>
+        <td>
+            {% if message_info.is_readed %}
+                <span class="badge badge-success">Odczytana</span>
+            {% else %}
+                <span class="badge badge-warning">Nieodczytana</span>
+            {% endif %}
+        </td>
+        <td><a href="{% url 'plemiona:message_detail' message_id %}" class="btn btn-primary btn-sm">Wejdź</a></td>
+    </tr>
+{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

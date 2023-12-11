@@ -1,6 +1,7 @@
 from django.db import models, IntegrityError
 from django.conf import settings
 import random
+from django.contrib.auth.models import User
 
 from django import forms
 
@@ -84,14 +85,33 @@ class Reports(models.Model):
         return f"Report {self.id} by {self.user.username}"
 
 
-class Message(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
+class Topic_message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
-    reply_to = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
-    content = models.TextField(default='brak tresci')  # Upewnij się, że to pole istnieje
-    topic = models.CharField(max_length=100,default='Brak tematu')
+    subject = models.CharField(max_length=100, default='New Message')
+    date = models.DateTimeField(auto_now_add=True)
+    is_readed_sender = models.BooleanField(default=True)
+    is_readed_receiver = models.BooleanField(default=False)
+
+    # Możesz dodać więcej pól, jeśli potrzebujesz
+
+class Answers_Message(models.Model):
+    topic_message = models.ForeignKey(Topic_message, related_name='replies', on_delete=models.CASCADE)
+    replier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    last_notification_receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='last_notification_receiver', null=True)
+    # Możesz dodać więcej pól, jeśli potrzebujesz
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.ForeignKey(Topic_message, on_delete=models.CASCADE, null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Możesz dodać więcej pól, np. typ powiadomienia, jeśli planujesz różne rodzaje powiadomień
 
     def __str__(self):
-        return f"Message from {self.sender.username} to {self.receiver.username} on {self.date}"
+        return f"Powiadomienie dla {self.user.username}"
+

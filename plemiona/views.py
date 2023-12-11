@@ -15,8 +15,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Message
-from .forms import MessageForm, ReplyMessageForm
+from .models import Topic_message, Notification, Answers_Message
+from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
 from .forms import UserRegisterForm
@@ -419,114 +419,121 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
         attacker_village.save()
         defender_village.save()
 
+# -------------------------messages_logic------------------------------------------------
+def messages_all(request):
+    topic_messages_query = Topic_message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('-date')
 
-def get_main_messages(user):
-    # Wybierz wiadomości, które nie są odpowiedziami na inne wiadomości
-    main_messages = Message.objects.filter(user=user, reply_to__isnull=True)
-    return main_messages
+    # Tworzenie słownika zawierającego informacje o wiadomościach i ich statusie odczytu
+    topic_messages = {}
+    for message in topic_messages_query:
+        is_sender = message.sender == request.user
+        is_readed = message.is_readed_sender if is_sender else message.is_readed_receiver
+        topic_messages[message.id] = {
+            'message': message,
+            'is_sender': is_sender,
+            'is_readed': is_readed
+        }
+
+    return render(request, 'plemiona/messages_all.html', {'topic_messages': topic_messages})
+
+def get_message_thread(topic_message):
+    # Rozpoczynamy od pierwszej wiadomości w wątku
+    thread = [topic_message]
+
+    # Pobieramy wszystkie odpowiedzi (MessageThread) na tę wiadomość
+    replies = Answers_Message.objects.filter(topic_message=topic_message).order_by('date')
+    for reply in replies:
+        thread.append(reply)
+
+    return thread
+
+def message_detail(request, message_id):
+    topic_message = get_object_or_404(Topic_message, id=message_id)
+    original_message = topic_message
+
+    if request.user == topic_message.sender:
+        topic_message.is_readed_sender = True
+        print("dobiorca",topic_message.is_readed_sender)
+    elif request.user == topic_message.receiver:
+        topic_message.is_readed_receiver = True
+        print("nadawca",topic_message.is_readed_receiver)
+
+    # Zapisz zmiany w Topic_message
+    topic_message.save()
+    thread = get_message_thread(topic_message)
+
+    if request.method == 'POST':
+        form = MessageThreadForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.topic_message = topic_message
+            reply.replier = request.user
+            reply.save()
+            if request.user == original_message.sender:
+                original_message.is_readed_sender = True
+                original_message.is_readed_receiver = False
+                print("zmieniam status jako  original_message.sender")
+            else:
+                original_message.is_readed_sender = False
+                original_message.is_readed_receiver = True
+                print("zmieniam status jako  reciver")
+
+            original_message.save()
+            print("nastapil zapis")
+            # Notification.objects.filter(user=request.user, message=topic_message).update(is_read=True)
+            return redirect('plemiona:message_detail', message_id=message_id)
+    else:
+        form = MessageThreadForm()
+
+
+    return render(request, 'plemiona/message_detail.html', {
+        'topic_message': topic_message,
+        'thread': thread,
+        'form': form
+    })
+
 
 # send message
+
+@login_required
 def send_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            new_message = form.save(commit=False)
-            new_message.user = request.user
-            new_message.sender = request.user
-            new_message.save()
-            return redirect('plemiona:sent_messages')
+            # Tworzymy nową wiadomość (Topic_message)
+            new_topic_message = form.save(commit=False)
+            new_topic_message.sender = request.user
+            new_topic_message.is_readed_receiver = False  # Ustawienie is_read na False
+            new_topic_message.is_readed_sender = True  # Ustawienie is_read na False
+            new_topic_message.save()
+
+            # Tworzymy pierwszą odpowiedź w wątku (MessageThread)
+            content = form.cleaned_data['content']  # Pobieramy treść z formularza
+            new_answers_message = Answers_Message(
+                topic_message=new_topic_message,
+                replier=request.user,
+                content=content
+            )
+            new_answers_message.save()
+            Notification.objects.create(
+                user=new_topic_message.receiver,
+                message=new_topic_message,
+                is_read=False
+            )
+            # Przekieruj do strony z wysłanymi wiadomościami
+            return redirect('plemiona:messages_all')
     else:
         form = MessageForm()
 
     return render(request, 'plemiona/send_message.html', {'form': form})
 
-
-def sent_messages_view(request):
-    sent_messages = Message.objects.filter(sender=request.user, reply_to__isnull=True)
-    return render(request, 'plemiona/sent_messages.html', {'messages': sent_messages})
+from .models import Topic_message, Answers_Message
+from .forms import MessageThreadForm
 
 
-def received_messages_view(request):
-    # Wybierz tylko te wiadomości, które zostały odebrane przez użytkownika i nie są odpowiedziami na inne wiadomości
-    received_messages = Message.objects.filter(receiver=request.user, reply_to__isnull=True)
-    return render(request, 'plemiona/received_messages.html', {'messages': received_messages})
-
-def get_message_thread(message):
-    thread = []
-    current_message = message
-    while current_message:
-        thread.append(current_message)
-        current_message = current_message.reply_to
-    return reversed(thread)  # Odwrócenie kolejności, aby najstarsze były na początku
-
-def message_detail(request, message_id):
-    message = get_object_or_404(Message, id=message_id)
-    thread = get_message_thread(message)
-    return render(request, 'plemiona/message_detail.html', {'message': message, 'thread': thread})
+def notifications_view(request):
+    user_notifications = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')
+    return render(request, 'plemiona/notifications.html', {'notifications': user_notifications})
 
 
-def all_messages_view(request):
-    user = request.user
-    # Pobierz wszystkie wiadomości związane z użytkownikiem, zarówno wysłane, jak i odebrane
-    messages = Message.objects.filter(Q(sender=user) | Q(receiver=user)).distinct().order_by('-date')
-    return render(request, 'plemiona/all_messages.html', {'messages': messages})
 
-
-# @login_required
-# def send_reply(request, message_id):
-#     original_message = get_object_or_404(Message, id=message_id)
-#     if request.method == 'POST':
-#         form = ReplyMessageForm(request.POST)
-#         if form.is_valid():
-#             reply_message = Message(
-#                 user=request.user,
-#                 sender=request.user,
-#                 receiver=original_message.sender,
-#                 content=form.cleaned_data['content'],
-#                 topic=form.cleaned_data['topic'],
-#                 reply_to=original_message
-#             )
-#             reply_message.save()
-#             return redirect('plemiona:sent_messages')
-#     else:
-#         form = ReplyMessageForm(initial={'topic': 'Re: ' + original_message.topic})
-#         # Dodaj logikę do pobrania poprzednich wiadomości w wątku
-#
-#     return render(request, 'plemiona/send_reply.html', {'form': form})
-def get_message_thread(message):
-    thread = []
-    while message:
-        thread.append(message)
-        message = message.reply_to
-    return reversed(thread)  # Odwrócenie kolejności, aby najstarsze były na początku
-
-def send_reply(request, message_id):
-    original_message = get_object_or_404(Message, id=message_id)
-    thread = get_message_thread(original_message)
-
-    if request.method == 'POST':
-        form = ReplyMessageForm(request.POST)
-        if form.is_valid():
-            # Utworzenie nowej wiadomości z danymi z formularza
-            reply_message = form.save(commit=False)
-            reply_message.user = request.user  # Ustawienie pola user
-            reply_message.sender = request.user
-            reply_message.receiver = original_message.sender
-            reply_message.reply_to = original_message
-
-            # Zapisanie nowej wiadomości w bazie danych
-            reply_message.save()
-
-            # Przekierowanie do listy wysłanych wiadomości
-            return redirect('plemiona:sent_messages')
-    else:
-        # Utworzenie pustego formularza z wstępnie ustawionym tematem
-        form = ReplyMessageForm(initial={'topic': 'Re: ' + original_message.topic})
-
-    return render(request, 'plemiona/send_reply.html', {'form': form, 'thread': thread})
-
-
-def user_details(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    villages = Village.objects.filter(user=user)
-    return render(request, 'plemiona/user_details.html', {'user': user, 'villages': villages})
