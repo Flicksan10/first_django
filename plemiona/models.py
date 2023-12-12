@@ -23,7 +23,7 @@ class Village(models.Model):
     iron = models.FloatField(default=1000)
     clay = models.FloatField(default=1000)
     town_hall = models.IntegerField(default=1)
-    barracks = models.IntegerField(default=0)
+    barracks = models.IntegerField(default=1)
     granary = models.IntegerField(default=1)
     farm = models.IntegerField(default=1)
     sawmill = models.IntegerField(default=1)
@@ -34,11 +34,12 @@ class Village(models.Model):
     forge = models.IntegerField(default=0)
     market = models.IntegerField(default=0)
     wall = models.IntegerField(default=0)
-    cache = models.IntegerField(default=0)
+    cache = models.IntegerField(default=1)
     palace = models.IntegerField(default=0)
-    population_total = models.IntegerField(default=0)
-    population_buildings = models.IntegerField(default=0)
-    population_army = models.IntegerField(default=0)
+    # population_total_current = models.IntegerField(default=38)
+    # population_total_max = models.IntegerField(default=240)
+    # population_buildings = models.IntegerField(default=38)
+    # population_army = models.IntegerField(default=0)
 
     #     raports = models.CharField(max_length=10000, default='New Village')
 
@@ -67,6 +68,22 @@ class Village(models.Model):
 #     votes = models.IntegerField(default=0)
 #     def __str__(self):              # __unicode__ on Python 2
 #         return self.choice_text
+
+class BuildingProperties(models.Model):
+    village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='building_properties')
+    building_type = models.CharField(max_length=100)
+    level = models.IntegerField(default=1)
+    performance = models.IntegerField(default=0)
+    bonus = models.IntegerField(default=0)
+    # Możesz dodać więcej dynamicznych pól, jeśli są potrzebne
+
+    def __str__(self):
+        return f"{self.building_type} properties for {self.village.village_name}"
+
+    class Meta:
+        unique_together = ('village', 'building_type')
+
+
 
 class Reports(models.Model):
     date = models.DateTimeField(auto_now_add=True)

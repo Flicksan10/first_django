@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Topic_message, Notification, Answers_Message, Reports
+from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -103,7 +103,8 @@ def create_village_for_user(username):
         town_hall=1,
         barracks=0,
         pikemen=0,
-        halberdiers=0
+        halberdiers=0,
+        population_total_max=240
     )
 
     # Zapisz wioskę w bazie danych
@@ -187,11 +188,6 @@ def town_hall_view(request, village_id):
     return render(request, 'plemiona/town_hall.html', context)
 
 
-# napisz mi funkcje, która będzie rozbudowywała budynek pobierała z tabeli village poziom np tartaku i sprawdzała z danych w buildings_data.py ile
-# kosztuje wyższy poziom i pobierze to z village i rozbuduje o 1 budynek
-
-
-
 def upgrade_building(request, village_id, building_type):
     # Pobierz wioskę
     village = get_object_or_404(Village, id=village_id, user=request.user)
@@ -208,6 +204,10 @@ def upgrade_building(request, village_id, building_type):
     if not next_level_data:
         # Przekieruj z powrotem do town_hall z komunikatem o błędzie
         return redirect('plemiona:town_hall_view', village_id=village_id)
+
+    print("Total population for next level:", next_level_data.get("total_population", "N/A"))
+    print("People needed for next level:", next_level_data.get("people_needed", "N/A"))
+
 
     # Sprawdź, czy wioska ma wystarczające zasoby
     if (
