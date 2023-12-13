@@ -19,9 +19,6 @@ class Village(models.Model):
     light_cavalry = models.IntegerField(default=0)
     archer_cavalry = models.IntegerField(default=0)
     heavy_cavalry = models.IntegerField(default=0)
-    wood = models.FloatField(default=1000)
-    iron = models.FloatField(default=1000)
-    clay = models.FloatField(default=1000)
     town_hall = models.IntegerField(default=1)
     barracks = models.IntegerField(default=1)
     granary = models.IntegerField(default=1)
@@ -36,15 +33,6 @@ class Village(models.Model):
     wall = models.IntegerField(default=0)
     cache = models.IntegerField(default=1)
     palace = models.IntegerField(default=0)
-    # population_total_current = models.IntegerField(default=38)
-    # population_total_max = models.IntegerField(default=240)
-    # population_buildings = models.IntegerField(default=38)
-    # population_army = models.IntegerField(default=0)
-
-    #     raports = models.CharField(max_length=10000, default='New Village')
-
-
-
 
     def __str__(self):
         return self.village_name
@@ -61,6 +49,18 @@ class Village(models.Model):
 
     class Meta:
         unique_together = ('coordinate_x', 'coordinate_y')
+
+class VillageResources(models.Model):
+    village = models.OneToOneField('Village', on_delete=models.CASCADE, related_name='resources')
+    wood = models.FloatField(default=1000)
+    wood_bonus = models.FloatField(default=0)
+    clay = models.FloatField(default=1000)
+    clay_bonus = models.FloatField(default=0)
+    iron = models.FloatField(default=1000)
+    iron_bonus = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"Resources for {self.village.village_name}"
 
 # class Choice(models.Model):
 #     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -146,3 +146,14 @@ class Notification(models.Model):
     def __str__(self):
         return f"Powiadomienie dla {self.user.username}"
 
+class ScheduledTask(models.Model):
+    village = models.ForeignKey(Village, on_delete=models.CASCADE)
+    task_type = models.CharField(max_length=100)
+    scheduled_time = models.DateTimeField()
+    status = models.CharField(max_length=20, default='scheduled')  # np. 'scheduled', 'completed'
+
+    def is_due(self):
+        return timezone.now() >= self.scheduled_time
+
+    def __str__(self):
+        return f"{self.task_type} for {self.village.village_name} at {self.scheduled_time}"

@@ -15,7 +15,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties
+from .buildings_data.create_village_scripts import \
+    initialize_building_properties_new_village, calculate_performance_building
+from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages
+from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -34,6 +37,7 @@ from django.contrib import messages
 # class UserLoginView(LoginView):
 #     # ... twoja konfiguracja klasy ...
 #     success_url = reverse_lazy('plemiona:plemiona')  # Użyj przestrzeni nazw 'plemiona' # ścieżka do Twojego szablonu logowania
+# create_resources_for_all_villages()
 class CustomLoginView(LoginView):
     form_class = CustomLoginForm
     template_name = 'plemiona/login.html'
@@ -74,7 +78,9 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('plemiona:get_user_village')  # Zmień na odpowiedni URL
+            create_village_for_user(user.username)
+            # Tworzenie wioski dla nowego użytkownika
+            return redirect('plemiona:login')  # Zmień na odpowiedni URL
     else:
         form = UserRegisterForm()
     return render(request, 'plemiona/register.html', {'form': form})
@@ -82,9 +88,17 @@ def register(request):
 
 def create_village_for_user(username):
     # Znajdź użytkownika na podstawie nazwy użytkownika
-    village_name = f'New_{username}'
     user = User.objects.get(username=username)
 
+    # Generuj nazwę wioski
+    village_name = f'New_{username}'
+
+    # Utwórz nową wioskę z właściwościami
+    new_village = create_village_with_properties(village_name, user)
+
+    return new_village
+
+def create_village_with_properties(village_name, user):
     # Generuj unikalne koordynaty
     unique_coordinates = False
     while not unique_coordinates:
@@ -92,32 +106,23 @@ def create_village_for_user(username):
         coordinate_y = random.randint(1, 10)
         if not Village.objects.filter(coordinate_x=coordinate_x, coordinate_y=coordinate_y).exists():
             unique_coordinates = True
+            # Utwórz nową wioskę
+            village = Village.objects.create(
+                user=user,
+                village_name=village_name,
+                coordinate_x=coordinate_x,
+                coordinate_y=coordinate_y,
+            )
+            # Inicjalizuj właściwości budynków dla nowej wioski
+            initialize_building_properties_new_village(village)
+            VillageResources.objects.create(village=village)
+            return village
 
-    # Utwórz nową wioskę
-    new_village = Village(
-        user=user,
-        village_name=village_name,
-        coordinate_x=coordinate_x,
-        coordinate_y=coordinate_y,
-        # Ustaw pozostałe wartości na podstawie domyślnych wartości modelu Village
-        town_hall=1,
-        barracks=0,
-        pikemen=0,
-        halberdiers=0,
-        population_total_max=240
-    )
-
-    # Zapisz wioskę w bazie danych
-    try:
-        new_village.save()
-        return new_village
-    except IntegrityError:
-        # W przypadku, gdyby doszło do kolizji koordynatów pomimo sprawdzenia
-        return None
+    # W przypadku, gdyby nie udało się znaleźć unikalnych koordynatów
+    return None
 
 
 # Tworzenie mapy do gry
-
 from django.shortcuts import render
 from .models import Village
 
@@ -167,69 +172,94 @@ def map_view(request):
 # ratusz z opcjami z rozbudowa itd
 def town_hall_view(request, village_id):
     village = Village.objects.get(id=village_id, user=request.user)
+
+    town_hall_level = getattr(village, 'town_hall')
+    town_hall_performance = buildings_data_dict['town_hall'][town_hall_level]['performance']
+
     missing_resources = []
     next_levels = {}
     building_levels = {}
+
     for building, levels in buildings_data_dict.items():
         current_level = getattr(village, building)
         next_level_data = levels.get(current_level + 1)
+
+        if next_level_data:
+            total_resources_cost = next_level_data["wood"] + next_level_data["clay"] + next_level_data["iron"]
+            build_time_seconds = round((total_resources_cost * town_hall_performance) / 100)
+            build_time_formatted = convert_seconds_to_time(build_time_seconds)
+            next_level_data = next_level_data.copy()
+            next_level_data['build_time'] = build_time_formatted
+
         next_levels[building] = next_level_data
         building_levels[building] = current_level
-    # print("dane")
-    # print(next_levels)
-    # print(building_levels)
+
     missing_resources = request.session.pop('missing_resources', None)
+
     context = {
         'village': village,
         'next_levels': next_levels,
         'building_levels': building_levels,
         'missing_resources': missing_resources
     }
+
     return render(request, 'plemiona/town_hall.html', context)
 
+def convert_seconds_to_time(seconds):
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    remaining_seconds = seconds % 60
+    return f"{hours}h {minutes}min {remaining_seconds}s"
 
+
+    # print("Total population for next level:", next_level_data.get("total_population", "N/A"))
+    # print("People needed for next level:", next_level_data.get("people_needed", "N/A"))
 def upgrade_building(request, village_id, building_type):
     # Pobierz wioskę
     village = get_object_or_404(Village, id=village_id, user=request.user)
+
     # Pobierz obecny poziom budynku
     current_level = getattr(village, building_type)
 
     # Pobierz dane budynku dla następnego poziomu
     building_data = buildings_data_dict.get(building_type, {})
     next_level_data = building_data.get(current_level + 1)
-    print(current_level)
-    print(building_data)
-    print(next_level_data)
 
     if not next_level_data:
         # Przekieruj z powrotem do town_hall z komunikatem o błędzie
         return redirect('plemiona:town_hall_view', village_id=village_id)
 
-    print("Total population for next level:", next_level_data.get("total_population", "N/A"))
-    print("People needed for next level:", next_level_data.get("people_needed", "N/A"))
-
-
     # Sprawdź, czy wioska ma wystarczające zasoby
-    if (
-            village.wood >= next_level_data["wood"]
-            and village.clay >= next_level_data["clay"]
-            and village.iron >= next_level_data["iron"]):
+    if (village.resources.wood >= next_level_data["wood"] and
+        village.resources.clay >= next_level_data["clay"] and
+        village.resources.iron >= next_level_data["iron"]):
         # Odejmij zasoby i zwiększ poziom budynku
-        village.wood -= next_level_data["wood"]
-        village.clay -= next_level_data["clay"]
-        village.iron -= next_level_data["iron"]
+        village.resources.wood -= next_level_data["wood"]
+        village.resources.clay -= next_level_data["clay"]
+        village.resources.iron -= next_level_data["iron"]
         setattr(village, building_type, current_level + 1)
+        village.resources.save()
         village.save()
+
+        # Aktualizuj właściwości budynku
+        building_properties, created = BuildingProperties.objects.get_or_create(
+            village=village,
+            building_type=building_type
+        )
+        building_properties.level = current_level + 1
+        building_properties.performance = calculate_performance_building(building_type, current_level + 1)
+        building_properties.save()
+
         # Przekieruj z powrotem do town_hall z komunikatem o sukcesie
         return redirect('plemiona:town_hall_view', village_id=village_id)
     else:
         # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
         missing_resources = []
-        if village.wood < next_level_data['wood']:
+        if village.resources.wood < next_level_data['wood']:
             missing_resources.append('drewno')
-        if village.clay < next_level_data['clay']:
+        if village.resources.clay < next_level_data['clay']:
             missing_resources.append('glina')
-        if village.iron < next_level_data['iron']:
+        if village.resources.iron < next_level_data['iron']:
             missing_resources.append('żelazo')
 
         if missing_resources:
@@ -287,36 +317,38 @@ def recruit_units(request, village_id):
         print(total_wood_needed, total_clay_needed, total_iron_needed)
                 # Sprawdzenie, czy wystarcza surowców
         if (
-                village.wood >= total_wood_needed
-                and village.clay >= total_clay_needed
-                and village.iron >= total_iron_needed):
+                village.resources.wood >= total_wood_needed
+                and village.resources.clay >= total_clay_needed
+                and village.resources.iron >= total_iron_needed):
                 for unit, costs in army_data.items():
+                    quantity_key = f'quantity_{unit}'
+                    quantity = int(request.POST.get(quantity_key, 0))
+                    print(quantity_key,quantity,unit)
 
-                        quantity_key = f'quantity_{unit}'
-                        quantity = int(request.POST.get(quantity_key, 0))
-                        print(quantity_key,quantity,unit)
-
-                        if quantity > 0:
+                    if quantity > 0:
                             # Aktualizacja liczby jednostek w wiosce
-                            current_quantity = getattr(village, unit, 0)
-                            setattr(village, unit, current_quantity + quantity)
-                            print(village,unit,current_quantity,quantity)
+                        current_quantity = getattr(village, unit, 0)
+                        setattr(village, unit, current_quantity + quantity)
+                        print(village,unit,current_quantity,quantity)
                     # Logika rekrutacji
                     # Aktualizacja surowców w wiosce
-                        village.wood -= total_wood_needed
-                        village.clay -= total_clay_needed
-                        village.iron -= total_iron_needed
-                        village.save()
+                village.resources.wood -= total_wood_needed
+                village.resources.clay -= total_clay_needed
+                village.resources.iron -= total_iron_needed
+
+                print("----total_wood_needed",total_wood_needed)
+                village.resources.save()
+                village.save()
                     # Przekierowanie po pomyślnej rekrutacji
                 return redirect('plemiona:barracks_view', village_id=village_id)
         else:
                     # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
                     missing_resources_units = []
-                    if village.wood < total_wood_needed:
+                    if village.resources.wood < total_wood_needed:
                         missing_resources_units.append('drewno')
-                    if village.clay < total_clay_needed:
+                    if village.resources.clay < total_clay_needed:
                         missing_resources_units.append('glina')
-                    if village.iron < total_iron_needed:
+                    if village.resources.iron < total_iron_needed:
                         missing_resources_units.append('żelazo')
 
                     if missing_resources_units:
@@ -408,7 +440,7 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
             for unit, count in defender_units.items():
                 current_count = getattr(defender_village, unit, 0)
                 setattr(defender_village, unit, max(current_count - count, 0))
-            loot=calculate_loot(battle_result, army_data, defender_village,attacker_village)
+            loot = calculate_loot(battle_result, army_data, defender_village,attacker_village)
         else:
             # Obrońca wygrywa
             for unit, count in units_to_attack.items():

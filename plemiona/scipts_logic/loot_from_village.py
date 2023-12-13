@@ -22,14 +22,14 @@ def calculate_loot(battle_result, army_data, defender_village,attacker_village):
     print(looted_resources)
     # dodać with transaction.atomic(): gdyby nie była wywołana w innej funkcji np update_units_after_battle
     # Aktualizuj stan surowców w atakowanej wiosce
-    defender_village.wood -= looted_resources["wood"]
-    defender_village.clay -= looted_resources["clay"]
-    defender_village.iron -= looted_resources["iron"]
-    defender_village.save()
-    attacker_village.wood += looted_resources["wood"]
-    attacker_village.clay += looted_resources["clay"]
-    attacker_village.iron += looted_resources["iron"]
-    attacker_village.save()
+    defender_village.resources.wood -= looted_resources["wood"]
+    defender_village.resources.clay -= looted_resources["clay"]
+    defender_village.resources.iron -= looted_resources["iron"]
+    defender_village.resources.save()
+    attacker_village.resources.wood += looted_resources["wood"]
+    attacker_village.resources.clay += looted_resources["clay"]
+    attacker_village.resources.iron += looted_resources["iron"]
+    attacker_village.resources.save()
 
 
     return looted_resources

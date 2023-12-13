@@ -18,6 +18,7 @@
     <tr>
       <th>Budynek</th>
       <th>Aktualny Poziom</th>
+      <th>czas budowy</th>
       <th><img src="{% static 'images/wood.jpg' %}" alt="Drewno"  class="resource-icon"> Drewno {{ data.wood }}</th>
       <th>  <img src="{% static 'images/clay.jpg' %}" alt="Glina" class="resource-icon"> Glina {{ data.clay }}</th>
       <th><img src="{% static 'images/iron.jpg' %}" alt="Żelazo" class="resource-icon"> Żelazo {{ data.iron }}</th>
@@ -30,6 +31,7 @@
         <td>{{ building|capfirst }}</td>
         {% if data %}
           <td>{{ village|get_attribute:building }}</td>
+          <td>{{ data.build_time}}</td>
           <td>{{ data.wood }}</td>
           <td>{{ data.clay }}</td>
           <td>{{ data.iron }}</td>
