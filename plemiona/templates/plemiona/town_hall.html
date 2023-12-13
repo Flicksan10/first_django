@@ -12,7 +12,23 @@
     <strong>Brakuje:</strong> {{ missing_resources|join:", " }}
   </div>
 {% endif %}
-
+<h3>Zadania Budowy</h3>
+<table>
+    <tr>
+        <th>Typ Budynku</th>
+        <th>Docelowy Poziom</th>
+        <th>Czas Zakończenia</th>
+        <th>Status</th>
+    </tr>
+    {% for task in building_tasks %}
+    <tr>
+        <td>{{ task.building_type }}</td>
+        <td>{{ task.target_level }}</td>
+        <td>{{ task.completion_time }}</td>
+        <td>{{ task.is_active|yesno:"Aktywne,Oczekujące" }}</td>
+    </tr>
+    {% endfor %}
+</table>
 <table>
   <thead>
     <tr>

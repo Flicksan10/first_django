@@ -146,14 +146,12 @@ class Notification(models.Model):
     def __str__(self):
         return f"Powiadomienie dla {self.user.username}"
 
-class ScheduledTask(models.Model):
+class BuildingTask(models.Model):
     village = models.ForeignKey(Village, on_delete=models.CASCADE)
-    task_type = models.CharField(max_length=100)
-    scheduled_time = models.DateTimeField()
-    status = models.CharField(max_length=20, default='scheduled')  # np. 'scheduled', 'completed'
-
-    def is_due(self):
-        return timezone.now() >= self.scheduled_time
+    building_type = models.CharField(max_length=100)
+    target_level = models.IntegerField()
+    completion_time = models.DateTimeField()
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.task_type} for {self.village.village_name} at {self.scheduled_time}"
+        return f"Budowa {self.building_type} do poziomu {self.target_level} w {self.village.village_name} kończy się o {self.completion_time}"

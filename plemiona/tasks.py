@@ -1,10 +1,11 @@
 from celery import shared_task
 from django.db import transaction
+from django.utils import timezone
 
 from djangoProject1.celery import app
 from .buildings_data.buildings import buildings_data_dict
 # from .buildings_data import buildings
-from .models import Village, BuildingProperties
+from .models import Village, BuildingProperties, BuildingTask
 
 
 # @shared_task
@@ -102,3 +103,21 @@ def get_performance(level, building_type, resource_data):
 #             resources.iron += iron_increase
 #             resources.save()
 
+@app.task
+def check_building_tasks():
+    with transaction.atomic():
+    # Przeszukaj aktywne zadania, które powinny być już zakończone
+        for task in BuildingTask.objects.filter(completion_time__lte=timezone.now(), is_active=True):
+            village = task.village
+
+            # Aktualizuj poziom budynku w Village
+            setattr(village, task.building_type, task.target_level)
+            village.save()
+            # Usuń wykonane zadanie
+            task.delete()
+
+            # Aktywuj kolejne zadanie, jeśli istnieje
+            next_task = BuildingTask.objects.filter(village=task.village, is_active=False).order_by('completion_time').first()
+            if next_task:
+                next_task.is_active = True
+                next_task.save()

@@ -72,7 +72,7 @@
                     <td>{{ active_village.resources.wood|floor }}</td>
                     <td>{{ active_village.resources.clay|floor }}</td>
                     <td>{{ active_village.resources.iron|floor }}</td>
-                    <td>{{ active_village.building_properties.performance}}</td>
+                    <td>{{ active_village.sawmill|calculate_performance:'sawmill'}}/h</td>
                     <td>{{ active_village.clay_pit|calculate_performance:'clay_pit' }}/h</td>
                     <td>{{ active_village.iron_mine|calculate_performance:'iron_mine' }}/h</td>
                     <td>{{ active_village.population }}</td>

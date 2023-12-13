@@ -18,7 +18,8 @@ from django.http import JsonResponse
 from .buildings_data.create_village_scripts import \
     initialize_building_properties_new_village, calculate_performance_building
 from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages
-from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources
+from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources, \
+    BuildingTask
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -172,6 +173,7 @@ def map_view(request):
 # ratusz z opcjami z rozbudowa itd
 def town_hall_view(request, village_id):
     village = Village.objects.get(id=village_id, user=request.user)
+    building_tasks = BuildingTask.objects.filter(village=village)
 
     town_hall_level = getattr(village, 'town_hall')
     town_hall_performance = buildings_data_dict['town_hall'][town_hall_level]['performance']
@@ -193,14 +195,23 @@ def town_hall_view(request, village_id):
 
         next_levels[building] = next_level_data
         building_levels[building] = current_level
-
+    building_tasks_data = []
+    for task in building_tasks:
+        building_tasks_data.append({
+            'building_type': task.building_type,
+            'target_level': task.target_level,
+            'completion_time': task.completion_time,
+            'is_active': task.is_active
+        })
     missing_resources = request.session.pop('missing_resources', None)
 
     context = {
         'village': village,
         'next_levels': next_levels,
         'building_levels': building_levels,
-        'missing_resources': missing_resources
+        'missing_resources': missing_resources,
+        'building_tasks': building_tasks_data  # Dodaj dane o zadaniach budowy do kontekstu
+
     }
 
     return render(request, 'plemiona/town_hall.html', context)
@@ -214,44 +225,56 @@ def convert_seconds_to_time(seconds):
 
     # print("Total population for next level:", next_level_data.get("total_population", "N/A"))
     # print("People needed for next level:", next_level_data.get("people_needed", "N/A"))
+
+
+from django.utils import timezone
+
 def upgrade_building(request, village_id, building_type):
-    # Pobierz wioskę
     village = get_object_or_404(Village, id=village_id, user=request.user)
-
-    # Pobierz obecny poziom budynku
     current_level = getattr(village, building_type)
-
-    # Pobierz dane budynku dla następnego poziomu
     building_data = buildings_data_dict.get(building_type, {})
     next_level_data = building_data.get(current_level + 1)
 
     if not next_level_data:
-        # Przekieruj z powrotem do town_hall z komunikatem o błędzie
         return redirect('plemiona:town_hall_view', village_id=village_id)
 
-    # Sprawdź, czy wioska ma wystarczające zasoby
     if (village.resources.wood >= next_level_data["wood"] and
-        village.resources.clay >= next_level_data["clay"] and
-        village.resources.iron >= next_level_data["iron"]):
-        # Odejmij zasoby i zwiększ poziom budynku
+            village.resources.clay >= next_level_data["clay"] and
+            village.resources.iron >= next_level_data["iron"]):
+
+        tasks_count = BuildingTask.objects.filter(village=village).count()
+        if tasks_count >= 3:
+            # Przekieruj z powrotem z komunikatem o osiągnięciu limitu zadań
+            return redirect('plemiona:town_hall_view', village_id=village_id, error="Limit zadań osiągnięty.")
+
+        last_task = BuildingTask.objects.filter(village=village).order_by('-completion_time').first()
+        start_time = last_task.completion_time if last_task else timezone.now()
+
+        # Oblicz czas budowy
+        total_resources_cost = next_level_data["wood"] + next_level_data["clay"] + next_level_data["iron"]
+        town_hall_performance = buildings_data_dict['town_hall'][village.town_hall]['performance']
+        build_time_seconds = round((total_resources_cost * town_hall_performance) / 100)
+        completion_time = start_time + timezone.timedelta(seconds=build_time_seconds)
+
+        # Odejmij zasoby
         village.resources.wood -= next_level_data["wood"]
         village.resources.clay -= next_level_data["clay"]
         village.resources.iron -= next_level_data["iron"]
-        setattr(village, building_type, current_level + 1)
         village.resources.save()
-        village.save()
 
-        # Aktualizuj właściwości budynku
-        building_properties, created = BuildingProperties.objects.get_or_create(
+        is_active = tasks_count == 0
+        # zapisanie budynku w tabli, która oznacza zadania do wykonania w wiosce
+        BuildingTask.objects.create(
             village=village,
-            building_type=building_type
+            building_type=building_type,
+            target_level=current_level + 1,
+            completion_time=completion_time,
+            is_active=is_active
         )
-        building_properties.level = current_level + 1
-        building_properties.performance = calculate_performance_building(building_type, current_level + 1)
-        building_properties.save()
 
-        # Przekieruj z powrotem do town_hall z komunikatem o sukcesie
+        # Przekieruj z powrotem do town_hall z komunikatem o rozpoczęciu budowy
         return redirect('plemiona:town_hall_view', village_id=village_id)
+
     else:
         # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
         missing_resources = []
@@ -263,9 +286,9 @@ def upgrade_building(request, village_id, building_type):
             missing_resources.append('żelazo')
 
         if missing_resources:
-
             request.session['missing_resources'] = missing_resources
             return redirect('plemiona:town_hall_view', village_id=village_id)
+
 
 #
 
