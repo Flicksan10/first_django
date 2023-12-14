@@ -7,7 +7,7 @@
 #
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Q
+from django.db.models import Q, Max
 
 from .army_data import army_data
 # from .buildings_data import buildings
@@ -90,13 +90,10 @@ def register(request):
 def create_village_for_user(username):
     # Znajdź użytkownika na podstawie nazwy użytkownika
     user = User.objects.get(username=username)
-
     # Generuj nazwę wioski
     village_name = f'New_{username}'
-
     # Utwórz nową wioskę z właściwościami
     new_village = create_village_with_properties(village_name, user)
-
     return new_village
 
 def create_village_with_properties(village_name, user):
@@ -174,17 +171,21 @@ def map_view(request):
 def town_hall_view(request, village_id):
     village = Village.objects.get(id=village_id, user=request.user)
     building_tasks = BuildingTask.objects.filter(village=village)
-
     town_hall_level = getattr(village, 'town_hall')
     town_hall_performance = buildings_data_dict['town_hall'][town_hall_level]['performance']
 
     missing_resources = []
     next_levels = {}
     building_levels = {}
+    building_tasks_data = {}
+    building_tasks_data_list = []
+
+    # Przygotowanie danych o zadaniach budowy
 
     for building, levels in buildings_data_dict.items():
         current_level = getattr(village, building)
-        next_level_data = levels.get(current_level + 1)
+        highest_target_level = building_tasks_data.get(building, current_level)
+        next_level_data = levels.get(highest_target_level + 1)
 
         if next_level_data:
             total_resources_cost = next_level_data["wood"] + next_level_data["clay"] + next_level_data["iron"]
@@ -195,23 +196,22 @@ def town_hall_view(request, village_id):
 
         next_levels[building] = next_level_data
         building_levels[building] = current_level
-    building_tasks_data = []
+    error_message = request.session.pop('error_message', None)
+    missing_resources = request.session.pop('missing_resources', None)
     for task in building_tasks:
-        building_tasks_data.append({
+        building_tasks_data_list.append({
             'building_type': task.building_type,
             'target_level': task.target_level,
             'completion_time': task.completion_time,
             'is_active': task.is_active
         })
-    missing_resources = request.session.pop('missing_resources', None)
-
     context = {
         'village': village,
         'next_levels': next_levels,
         'building_levels': building_levels,
         'missing_resources': missing_resources,
-        'building_tasks': building_tasks_data  # Dodaj dane o zadaniach budowy do kontekstu
-
+        'error_message': error_message,
+        'building_tasks': building_tasks_data_list  # Dodaj dane o zadaniach budowy do kontekstu
     }
 
     return render(request, 'plemiona/town_hall.html', context)
@@ -233,56 +233,66 @@ def upgrade_building(request, village_id, building_type):
     village = get_object_or_404(Village, id=village_id, user=request.user)
     current_level = getattr(village, building_type)
     building_data = buildings_data_dict.get(building_type, {})
-    next_level_data = building_data.get(current_level + 1)
 
-    if not next_level_data:
+    tasks_count = BuildingTask.objects.filter(village=village).count()
+    if tasks_count >= 3:
+        request.session['error_message'] = "Limit zadań osiągnięty."
+        # Przekieruj z powrotem z komunikatem o osiągnięciu limitu zadań
         return redirect('plemiona:town_hall_view', village_id=village_id)
 
-    if (village.resources.wood >= next_level_data["wood"] and
-            village.resources.clay >= next_level_data["clay"] and
-            village.resources.iron >= next_level_data["iron"]):
+    # Znajdź ostatnie zadanie w kolejce
+    last_task = BuildingTask.objects.filter(village=village).order_by('-completion_time').first()
+    start_time = last_task.completion_time if last_task else timezone.now()
 
-        tasks_count = BuildingTask.objects.filter(village=village).count()
-        if tasks_count >= 3:
-            # Przekieruj z powrotem z komunikatem o osiągnięciu limitu zadań
-            return redirect('plemiona:town_hall_view', village_id=village_id, error="Limit zadań osiągnięty.")
+    # Ustal poziom docelowy dla nowego zadania
+    highest_target_level = BuildingTask.objects.filter(
+        village=village,
+        building_type=building_type
+    ).aggregate(Max('target_level'))['target_level__max']
+    target_level = highest_target_level + 1 if highest_target_level is not None else current_level + 1
 
-        last_task = BuildingTask.objects.filter(village=village).order_by('-completion_time').first()
-        start_time = last_task.completion_time if last_task else timezone.now()
+    # Pobierz dane budynku dla poziomu docelowego
+    target_level_data = building_data.get(target_level)
+    if not target_level_data:
+        return redirect('plemiona:town_hall_view', village_id=village_id)
+
+    if (village.resources.wood >= target_level_data["wood"] and
+            village.resources.clay >= target_level_data["clay"] and
+            village.resources.iron >= target_level_data["iron"]):
+        print(target_level,target_level_data["wood"],target_level_data["clay"],target_level_data["iron"] )
 
         # Oblicz czas budowy
-        total_resources_cost = next_level_data["wood"] + next_level_data["clay"] + next_level_data["iron"]
+        total_resources_cost = target_level_data["wood"] + target_level_data["clay"] + target_level_data["iron"]
         town_hall_performance = buildings_data_dict['town_hall'][village.town_hall]['performance']
         build_time_seconds = round((total_resources_cost * town_hall_performance) / 100)
         completion_time = start_time + timezone.timedelta(seconds=build_time_seconds)
 
         # Odejmij zasoby
-        village.resources.wood -= next_level_data["wood"]
-        village.resources.clay -= next_level_data["clay"]
-        village.resources.iron -= next_level_data["iron"]
+        village.resources.wood -= target_level_data["wood"]
+        village.resources.clay -= target_level_data["clay"]
+        village.resources.iron -= target_level_data["iron"]
         village.resources.save()
 
         is_active = tasks_count == 0
-        # zapisanie budynku w tabli, która oznacza zadania do wykonania w wiosce
+        # Zapisanie zadania budowy w tabeli
         BuildingTask.objects.create(
             village=village,
             building_type=building_type,
-            target_level=current_level + 1,
+            target_level=target_level,
             completion_time=completion_time,
             is_active=is_active
         )
 
-        # Przekieruj z powrotem do town_hall z komunikatem o rozpoczęciu budowy
         return redirect('plemiona:town_hall_view', village_id=village_id)
 
     else:
         # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
         missing_resources = []
-        if village.resources.wood < next_level_data['wood']:
+        if village.resources.wood < target_level_data['wood']:
             missing_resources.append('drewno')
-        if village.resources.clay < next_level_data['clay']:
+        if village.resources.clay < target_level_data['clay']:
             missing_resources.append('glina')
-        if village.resources.iron < next_level_data['iron']:
+        if village.resources.iron < target_level_data['iron']:
             missing_resources.append('żelazo')
 
         if missing_resources:

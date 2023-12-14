@@ -12,6 +12,11 @@
     <strong>Brakuje:</strong> {{ missing_resources|join:", " }}
   </div>
 {% endif %}
+{% if error_message %}
+<div class="missing-resources">
+    {{ error_message }}
+</div>
+{% endif %}
 <h3>Zadania Budowy</h3>
 <table>
     <tr>
