@@ -1,11 +1,13 @@
 from django.db import transaction
 
 from plemiona.army_data import army_data
-from plemiona.models import Village, Reports
+from plemiona.models import Village, Reports, ArmyTask
+from plemiona.scipts_logic.after_battle_return import create_return_task
 from plemiona.scipts_logic.loot_from_village import calculate_loot
 
 
-def update_units_after_battle(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner, battle_result):
+def update_units_after_battle(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner,
+                              battle_result):
     # Pobierz wioski
     attacker_village = Village.objects.get(id=attacker_village_id)
     defender_village = Village.objects.get(id=defender_village_id)
@@ -20,7 +22,8 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
         for unit, count in defender_units.items():
             current_count = getattr(defender_village.army, f"{unit}_inside", 0)
             setattr(defender_village.army, f"{unit}_inside", max(current_count - count, 0))
-        loot = calculate_loot(battle_result, army_data, defender_village, attacker_village)
+        loot = calculate_loot(battle_result, army_data, defender_village)
+        create_return_task(attacker_village, defender_village, battle_result, loot)
     else:
         # Obrońca wygrywa
         for unit, count in units_to_attack.items():
@@ -37,6 +40,8 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
     # Zapisz zmiany w bazie danych
     attacker_village.army.save()
     defender_village.army.save()
+
+
 
 
 def save_battle_report(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner,

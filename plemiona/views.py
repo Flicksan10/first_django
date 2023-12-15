@@ -30,6 +30,7 @@ from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
+from .scipts_logic.after_battle_return import calculate_travel_time
 from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.loot_from_village import calculate_loot
 from .buildings_data.buildings import buildings_data_dict
@@ -403,13 +404,13 @@ def place_view(request, village_id):
     current_army = {}
     for unit in army_data.keys():
         inside = getattr(army, f"{unit}_inside", 0)
-        outside = getattr(army, f"{unit}_outside", 0)
-        current_army[unit] = inside + outside
-    print(current_army)
+        # outside = getattr(army, f"{unit}_outside", 0)
+        current_army[unit] = inside
+    # print(current_army)
 
     missing_units = request.session.pop('missing_units', None)
     messages_units = request.session.pop('messages', None)
-    print(army_data[unit])
+    # print(army_data[unit])
     context = {
         'village': village,
         'army_data': army_data,
@@ -421,21 +422,7 @@ def place_view(request, village_id):
     return render(request, 'plemiona/place.html', context)
 
 
-def calculate_travel_time(attacker_village, defender_village, army):
-    # Oblicz odległość między wioskami
-    distance = ((defender_village.coordinate_x - attacker_village.coordinate_x) ** 2 +
-                (defender_village.coordinate_y - attacker_village.coordinate_y) ** 2) ** 0.5
-    print(attacker_village.coordinate_x, attacker_village.coordinate_y)
-    print(defender_village.coordinate_x, defender_village.coordinate_y)
-    print(distance)
 
-    # Znajdź najwolniejszą jednostkę w armii
-    slowest_speed = min(army_data[unit]['speed'] for unit in army if army[unit] > 0)
-
-    # Oblicz czas podróży (przykładowa formuła, może wymagać dostosowania)
-    travel_time_seconds = distance * slowest_speed * 60  # Przykładowa konwersja na sekundy
-    print(travel_time_seconds)
-    return travel_time_seconds
 
 @login_required
 def attack_view(request, village_id):
@@ -469,12 +456,12 @@ def attack_view(request, village_id):
 
             # Odejmij jednostki od armii wewnątrz wioski i dodaj do jednostek poza wioską
             setattr(attacker_army, f"{unit}_inside", getattr(attacker_army, f"{unit}_inside") - quantity)
-            setattr(attacker_army, f"{unit}_outside", getattr(attacker_army, f"{unit}_outside", 0) + quantity)
+            setattr(attacker_army, f"{unit}_outside", getattr      (attacker_army, f"{unit}_outside", 0) + quantity)
             attacker_army.save()
 
         # Oblicz czas podróży (funkcja calculate_travel_time musi być zdefiniowana)
         travel_time_seconds = calculate_travel_time(attacker_village, defender_village, units_to_attack)
-
+        print("tworze taska")
         # Zapisz zadanie ataku
         ArmyTask.objects.create(
             attacker_village=attacker_village,
@@ -482,7 +469,7 @@ def attack_view(request, village_id):
             army_composition=units_to_attack,
             departure_time=timezone.now(),
             arrival_time=timezone.now() + timezone.timedelta(seconds=travel_time_seconds),
-            is_active=True
+            action_type='attack'  # Zaktualizowane zgodnie z nowym modelem
         )
 
         # Przekieruj z powrotem do widoku wioski z komunikatem o wysłaniu ataku

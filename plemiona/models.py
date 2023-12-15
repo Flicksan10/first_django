@@ -180,9 +180,18 @@ class BuildingTask(models.Model):
 
 
 class ArmyTask(models.Model):
+    ACTION_CHOICES = [
+        ('attack', 'Attack'),
+        ('return_attack', 'Return from Attack'),
+        ('defense_send', 'Send Defense'),
+        ('defense_return', 'Return Defense'),
+        # Dodaj więcej opcji według potrzeb
+    ]
+
     attacker_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='attacking_armies')
     defender_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='defending_armies')
     army_composition = models.JSONField()  # Przechowuje skład armii
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
-    is_active = models.BooleanField(default=True)
+    action_type = models.CharField(max_length=20, choices=ACTION_CHOICES,default='attack')
+    looted_resources = models.JSONField(default=dict)
