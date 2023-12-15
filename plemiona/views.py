@@ -17,9 +17,10 @@ from django.http import JsonResponse
 
 from .buildings_data.create_village_scripts import \
     initialize_building_properties_new_village, calculate_performance_building
-from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages
+from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages, \
+    initialize_army_for_all_villages
 from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources, \
-    BuildingTask
+    BuildingTask, ArmyTask, Army
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -114,6 +115,7 @@ def create_village_with_properties(village_name, user):
             # Inicjalizuj właściwości budynków dla nowej wioski
             initialize_building_properties_new_village(village)
             VillageResources.objects.create(village=village)
+            Army.objects.create(village=village)
             return village
 
     # W przypadku, gdyby nie udało się znaleźć unikalnych koordynatów
@@ -305,13 +307,16 @@ def upgrade_building(request, village_id, building_type):
 # @login_required2
 def barracks_view(request, village_id):
     village = Village.objects.get(id=village_id, user=request.user)
+    army = village.army  # Pobranie obiektu Army powiązanego z wioską
+
+    # Sumowanie wartości jednostek
+    current_army = {}
+    for unit in army_data.keys():
+        inside = getattr(army, f"{unit}_inside", 0)
+        outside = getattr(army, f"{unit}_outside", 0)
+        current_army[unit] = inside + outside
+    print(current_army)
     missing_resources_units = []
-    current_army = {
-        'pikemen': village.pikemen,
-        'halberdiers': village.halberdiers,
-        'axeman': village.axeman,
-        'archer': village.archer,
-    }
     missing_resources_units = request.session.pop('missing_resources_units', None)
     context = {
         'village': village,
@@ -327,6 +332,7 @@ def barracks_view(request, village_id):
 def recruit_units(request, village_id):
     if request.method == 'POST':
         village = Village.objects.get(id=village_id, user=request.user)
+        army = village.army  # Pobierz obiekt Army powiązany z wioską
 
         total_wood_needed = 0
         total_clay_needed = 0
@@ -335,7 +341,6 @@ def recruit_units(request, village_id):
         for unit, costs in army_data.items():
             quantity_key = f'quantity_{unit}'
             quantity = int(request.POST.get(quantity_key, 0))
-            # print(quantity_key,quantity)
             if quantity > 0:
                 wood_needed = costs['wood'] * quantity
                 clay_needed = costs['clay'] * quantity
@@ -345,35 +350,32 @@ def recruit_units(request, village_id):
                 total_clay_needed += clay_needed
                 total_iron_needed += iron_needed
 
-                # Tutaj możesz dodać logikę sprawdzającą, czy wioska ma wystarczająco surowców
-                # i ewentualnie przeprowadzić rekrutację
-        print(total_wood_needed, total_clay_needed, total_iron_needed)
-                # Sprawdzenie, czy wystarcza surowców
-        if (
-                village.resources.wood >= total_wood_needed
-                and village.resources.clay >= total_clay_needed
-                and village.resources.iron >= total_iron_needed):
-                for unit, costs in army_data.items():
-                    quantity_key = f'quantity_{unit}'
-                    quantity = int(request.POST.get(quantity_key, 0))
-                    print(quantity_key,quantity,unit)
+        if (village.resources.wood >= total_wood_needed and
+            village.resources.clay >= total_clay_needed and
+            village.resources.iron >= total_iron_needed):
+            for unit, costs in army_data.items():
+                quantity_key = f'quantity_{unit}'
+                quantity = int(request.POST.get(quantity_key, 0))
 
-                    if quantity > 0:
-                            # Aktualizacja liczby jednostek w wiosce
-                        current_quantity = getattr(village, unit, 0)
-                        setattr(village, unit, current_quantity + quantity)
-                        print(village,unit,current_quantity,quantity)
-                    # Logika rekrutacji
-                    # Aktualizacja surowców w wiosce
-                village.resources.wood -= total_wood_needed
-                village.resources.clay -= total_clay_needed
-                village.resources.iron -= total_iron_needed
+                if quantity > 0:
+                    # Aktualizacja liczby jednostek w armii
+                    unit_inside_field = f'{unit}_inside'
+                    current_quantity = getattr(army, unit_inside_field, 0)
+                    setattr(army, unit_inside_field, current_quantity + quantity)
 
-                print("----total_wood_needed",total_wood_needed)
-                village.resources.save()
-                village.save()
+            # Aktualizacja surowców w wiosce
+            village.resources.wood -= total_wood_needed
+            village.resources.clay -= total_clay_needed
+            village.resources.iron -= total_iron_needed
+
+            village.resources.save()
+            army.save()  # Zapisz zmiany w armii
+            village.save()
+
+            # Możesz dodać komunikat o sukcesie rekrutacji
+            messages.success(request, 'Units recruited successfully.')
                     # Przekierowanie po pomyślnej rekrutacji
-                return redirect('plemiona:barracks_view', village_id=village_id)
+            return redirect('plemiona:barracks_view', village_id=village_id)
         else:
                     # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
                     missing_resources_units = []
@@ -393,135 +395,108 @@ def recruit_units(request, village_id):
         return redirect('plemiona:barracks_view', village_id=village_id)
 
 
-def place_view(request,village_id):
+def place_view(request, village_id):
+    village = get_object_or_404(Village, id=village_id, user=request.user)
+    army = village.army  # Pobranie obiektu Army powiązanego z wioską
 
-        village = Village.objects.get(id=village_id, user=request.user)
-        missing_units = []
+    # Sumowanie wartości jednostek
+    current_army = {}
+    for unit in army_data.keys():
+        inside = getattr(army, f"{unit}_inside", 0)
+        outside = getattr(army, f"{unit}_outside", 0)
+        current_army[unit] = inside + outside
+    print(current_army)
 
-        missing_resources_units = request.session.pop('missing_units', None)
-        context = {
-            'village': village,
-            'army_data': army_data,
-            'missing_units': missing_resources_units
-        }
-        # sprawdzić dalczego nie działa "current_army"
-        return render(request, 'plemiona/place.html', context)
+    missing_units = request.session.pop('missing_units', None)
+    messages_units = request.session.pop('messages', None)
+    print(army_data[unit])
+    context = {
+        'village': village,
+        'army_data': army_data,
+        'current_army': current_army,  # Dodanie sumowanych wartości do kontekstu
+        'missing_units': missing_units,
+        'messages_units': messages_units
+    }
+
+    return render(request, 'plemiona/place.html', context)
 
 
+def calculate_travel_time(attacker_village, defender_village, army):
+    # Oblicz odległość między wioskami
+    distance = ((defender_village.coordinate_x - attacker_village.coordinate_x) ** 2 +
+                (defender_village.coordinate_y - attacker_village.coordinate_y) ** 2) ** 0.5
+    print(attacker_village.coordinate_x, attacker_village.coordinate_y)
+    print(defender_village.coordinate_x, defender_village.coordinate_y)
+    print(distance)
 
+    # Znajdź najwolniejszą jednostkę w armii
+    slowest_speed = min(army_data[unit]['speed'] for unit in army if army[unit] > 0)
+
+    # Oblicz czas podróży (przykładowa formuła, może wymagać dostosowania)
+    travel_time_seconds = distance * slowest_speed * 60  # Przykładowa konwersja na sekundy
+    print(travel_time_seconds)
+    return travel_time_seconds
 
 @login_required
 def attack_view(request, village_id):
     if request.method == 'POST':
         attacker_village = get_object_or_404(Village, id=village_id)
+        attacker_army = attacker_village.army  # Pobierz obiekt Army powiązany z atakującą wioską
         x_coordinate = request.POST.get('coordinate_x')
         y_coordinate = request.POST.get('coordinate_y')
         defender_village = get_object_or_404(Village, coordinate_x=x_coordinate, coordinate_y=y_coordinate)
-        # logic to take units from form and use them in function
+
+        # Logika do pobrania jednostek z formularza
         units_to_attack = {}
+        total_units_to_attack = 0
         for key in request.POST:
             if key.startswith('quantity-'):
-                unit_name = key.split('-')[1]  # Pobranie nazwy jednostki
-                quantity = int(request.POST.get(key, 0))  # Pobranie ilości jednostek
+                unit_name = key.split('-')[1]
+                quantity = int(request.POST.get(key, 0))
                 if quantity > 0:
                     units_to_attack[unit_name] = quantity
+                    total_units_to_attack += quantity
+
+        if total_units_to_attack < 15:
+            messages.error(request, 'You need to send at least 15 units for an attack.')
+            return redirect('plemiona:place_view', village_id=village_id)
+
+        # Sprawdź, czy wystarczająca liczba jednostek jest dostępna wewnątrz wioski
         for unit, quantity in units_to_attack.items():
-            if getattr(attacker_village, unit, 0) < quantity:
-                # If not, redirect back to the 'place_view' with an error message
+            if getattr(attacker_army, f"{unit}_inside", 0) < quantity:
                 messages.error(request, f'Not enough {unit} in the attacking village.')
                 return redirect('plemiona:place_view', village_id=village_id)
-        print("Wspolrzedne X i Y:", x_coordinate, y_coordinate)
-        print("Jednostki do ataku:", units_to_attack)
 
-        #  take units from defender village
-        unit_names = list(army_data.keys())
-        defender_units = {unit: getattr(defender_village, unit,0) for unit in unit_names }
-        defender_units = {k: v for k, v in defender_units.items() if v != 0}
-        print("Jednostki w wiosce obroncy:", defender_units)
-        # defender_units={"halberdiers": 8,'archer':15}
-        # units_to_attack = {"axeman": 100, 'light_cavalry': 5}
-        # battle_result = {'axeman': 80, 'light_cavalry': 4}
-        winner,battle_result = simulate_battle(units_to_attack, defender_units, army_data)
-        # Aktualizacja danych po walce
-        print(winner,battle_result)
+            # Odejmij jednostki od armii wewnątrz wioski i dodaj do jednostek poza wioską
+            setattr(attacker_army, f"{unit}_inside", getattr(attacker_army, f"{unit}_inside") - quantity)
+            setattr(attacker_army, f"{unit}_outside", getattr(attacker_army, f"{unit}_outside", 0) + quantity)
+            attacker_army.save()
 
-        update_units_after_battle(attacker_village.id,defender_village.id,units_to_attack,defender_units, winner,battle_result)
+        # Oblicz czas podróży (funkcja calculate_travel_time musi być zdefiniowana)
+        travel_time_seconds = calculate_travel_time(attacker_village, defender_village, units_to_attack)
 
+        # Zapisz zadanie ataku
+        ArmyTask.objects.create(
+            attacker_village=attacker_village,
+            defender_village=defender_village,
+            army_composition=units_to_attack,
+            departure_time=timezone.now(),
+            arrival_time=timezone.now() + timezone.timedelta(seconds=travel_time_seconds),
+            is_active=True
+        )
+
+        # Przekieruj z powrotem do widoku wioski z komunikatem o wysłaniu ataku
+        messages.success(request, 'Attack has been launched.')
         return redirect('plemiona:place_view', village_id=village_id)
-        print("udalo sie")
-    else:
-        return render(request, 'attack_form.html', {'village_id': village_id})
-        print("nie udalo sie")
 
+    else:
+        # Jeśli metoda nie jest POST, wyświetl formularz ataku
+        return render(request, 'attack_form.html', {'village_id': village_id})
 
 
 from django.db import transaction
 
-def update_units_after_battle(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner, battle_result):
-    with transaction.atomic():
-        # Pobierz wioski
-        attacker_village = Village.objects.get(id=attacker_village_id)
-        defender_village = Village.objects.get(id=defender_village_id)
 
-        if winner == 'attacker':
-            # Atakujący wygrywa
-            for unit, count in units_to_attack.items():
-                loss = count - battle_result.get(unit, 0)
-                current_count = getattr(attacker_village, unit, 0)
-                setattr(attacker_village, unit, max(current_count - loss, 0))
-
-            for unit, count in defender_units.items():
-                current_count = getattr(defender_village, unit, 0)
-                setattr(defender_village, unit, max(current_count - count, 0))
-            loot = calculate_loot(battle_result, army_data, defender_village,attacker_village)
-        else:
-            # Obrońca wygrywa
-            for unit, count in units_to_attack.items():
-                current_count = getattr(attacker_village, unit, 0)
-                setattr(attacker_village, unit, max(current_count - count, 0))
-
-            for unit, count in defender_units.items():
-                loss = count - battle_result.get(unit, 0)
-                current_count = getattr(defender_village, unit, 0)
-                setattr(defender_village, unit, max(current_count - loss, 0))
-        save_battle_report(attacker_village.id,defender_village.id,units_to_attack,defender_units, winner,battle_result,loot)
-        # Zapisz zmiany w bazie danych
-        attacker_village.save()
-        defender_village.save()
-
-
-def save_battle_report(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner,
-                       battle_result, loot= {} ):
-    # Retrieve the village instances
-    attacker_village = Village.objects.get(id=attacker_village_id)
-    defender_village = Village.objects.get(id=defender_village_id)
-
-    # Determine the winner and loser
-    if winner == 'attacker':
-        winner_user = attacker_village.user
-        loser_user = defender_village.user
-    else:
-        winner_user = defender_village.user
-        loser_user = attacker_village.user
-
-    # Create a new Reports instance
-    report = Reports(
-        attacker_user=attacker_village.user,
-        defender_user=defender_village.user,
-        village_attacker=attacker_village,
-        village_defender=defender_village,
-        attacker_army=units_to_attack,
-        defender_army=defender_units,
-        result=battle_result,
-        winner=winner_user,
-        loser=loser_user,
-        loot=loot,
-    )
-
-    # Save the Reports instance
-    report.save()
-
-    return report
 
 def reports_view(request):
     # Retrieve all reports from the database

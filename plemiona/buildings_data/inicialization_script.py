@@ -1,7 +1,7 @@
 from django.db import transaction
 
 from plemiona.buildings_data.buildings import buildings_data_dict
-from plemiona.models import Village, BuildingProperties, VillageResources
+from plemiona.models import Village, BuildingProperties, VillageResources, Army
 
 
 def initialize_building_properties():
@@ -37,3 +37,9 @@ def calculate_performance2(building_type, level):
 def create_resources_for_all_villages():
     for village in Village.objects.all():
         VillageResources.objects.get_or_create(village=village)
+
+
+def initialize_army_for_all_villages():
+    with transaction.atomic():
+        for village in Village.objects.all():
+            Army.objects.get_or_create(village=village)

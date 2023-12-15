@@ -12,13 +12,6 @@ class Village(models.Model):
     village_name = models.CharField(max_length=100, default='New Village')
     coordinate_x = models.IntegerField(default=1)
     coordinate_y = models.IntegerField(default=1)
-    pikemen = models.IntegerField(default=0)
-    halberdiers = models.IntegerField(default=0)
-    archer = models.IntegerField(default=0)
-    axeman = models.IntegerField(default=0)
-    light_cavalry = models.IntegerField(default=0)
-    archer_cavalry = models.IntegerField(default=0)
-    heavy_cavalry = models.IntegerField(default=0)
     town_hall = models.IntegerField(default=1)
     barracks = models.IntegerField(default=1)
     granary = models.IntegerField(default=1)
@@ -49,6 +42,35 @@ class Village(models.Model):
 
     class Meta:
         unique_together = ('coordinate_x', 'coordinate_y')
+
+class Army(models.Model):
+    village = models.OneToOneField(Village, on_delete=models.CASCADE, related_name='army')
+    pikemen_inside = models.IntegerField(default=0)
+    pikemen_outside = models.IntegerField(default=0)
+    halberdiers_inside = models.IntegerField(default=0)
+    halberdiers_outside = models.IntegerField(default=0)
+    archer_inside = models.IntegerField(default=0)
+    archer_outside = models.IntegerField(default=0)
+    axeman_inside = models.IntegerField(default=0)
+    axeman_outside = models.IntegerField(default=0)
+    light_cavalry_inside = models.IntegerField(default=0)
+    light_cavalry_outside = models.IntegerField(default=0)
+    archer_cavalry_inside = models.IntegerField(default=0)
+    archer_cavalry_outside = models.IntegerField(default=0)
+    heavy_cavalry_inside = models.IntegerField(default=0)
+    heavy_cavalry_outside = models.IntegerField(default=0)
+
+
+class ArmyHelp(models.Model):
+    supporting_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='sent_support')
+    receiving_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='received_support')
+    pikemen = models.IntegerField(default=0)
+    halberdiers = models.IntegerField(default=0)
+    archer = models.IntegerField(default=0)
+    axeman = models.IntegerField(default=0)
+    light = models.IntegerField(default=0)
+    archer_cavalry = models.IntegerField(default=0)
+    heavy_cavalry = models.IntegerField(default=0)
 
 class VillageResources(models.Model):
     village = models.OneToOneField('Village', on_delete=models.CASCADE, related_name='resources')
@@ -155,3 +177,12 @@ class BuildingTask(models.Model):
 
     def __str__(self):
         return f"Budowa {self.building_type} do poziomu {self.target_level} w {self.village.village_name} kończy się o {self.completion_time}"
+
+
+class ArmyTask(models.Model):
+    attacker_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='attacking_armies')
+    defender_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='defending_armies')
+    army_composition = models.JSONField()  # Przechowuje skład armii
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+    is_active = models.BooleanField(default=True)

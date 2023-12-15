@@ -3,9 +3,12 @@ from django.db import transaction
 from django.utils import timezone
 
 from djangoProject1.celery import app
+from .army_data import army_data
 from .buildings_data.buildings import buildings_data_dict
 # from .buildings_data import buildings
-from .models import Village, BuildingProperties, BuildingTask
+from .models import Village, BuildingProperties, BuildingTask, ArmyTask
+from .scipts_logic.attack_logic import simulate_battle
+from .scipts_logic.after_battle_logic import update_units_after_battle
 
 
 # @shared_task
@@ -121,3 +124,31 @@ def check_building_tasks():
             if next_task:
                 next_task.is_active = True
                 next_task.save()
+
+
+@app.task
+def process_attacks():
+    with transaction.atomic():
+        for task in ArmyTask.objects.filter(arrival_time__lte=timezone.now(), is_active=True):
+            attacker_village = task.attacker_village
+            defender_village = task.defender_village
+            defender_army = defender_village.army  # Pobierz obiekt Army powiązany z broniącą się wioską
+            units_to_attack = task.army_composition
+
+            # Pobierz jednostki obrońcy z modelu Army
+            defender_units = {}
+            for unit in army_data.keys():
+                inside_units = getattr(defender_army, f"{unit}_inside", 0)
+                # help_units = getattr(defender_army, f"{unit}_help", 0)
+                defender_units[unit] = inside_units
+
+            # Symuluj bitwę
+            winner, battle_result = simulate_battle(units_to_attack, defender_units, army_data)
+
+            # Aktualizuj dane po walce
+            update_units_after_battle(attacker_village.id, defender_village.id, units_to_attack, defender_units, winner, battle_result)
+
+            # Zakończ zadanie
+            task.is_active = False
+            task.save()
+
