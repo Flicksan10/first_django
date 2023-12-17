@@ -30,6 +30,7 @@ from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
+from .scipts_logic.after_battle_logic import save_battle_report
 from .scipts_logic.after_battle_return import calculate_travel_time
 from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.loot_from_village import calculate_loot
@@ -137,10 +138,11 @@ def village_detail(request, village_id):
     if village.user == request.user:
         # Ustaw tę wioskę jako aktywną w sesji
         request.session['active_village'] = village.id
+        army_tasks = ArmyTask.objects.filter(attacker_village=village)
     else:
-        # Jeśli wioska nie należy do użytkownika, nie zmieniaj active_village
+        army_tasks = None
         pass
-    return render(request, 'plemiona/village_detail.html', {'village': village})
+    return render(request, 'plemiona/village_detail.html', {'village': village, 'army_tasks': army_tasks})
 
 def map_view(request):
     active_village_id = request.session.get('active_village')
@@ -456,7 +458,7 @@ def attack_view(request, village_id):
 
             # Odejmij jednostki od armii wewnątrz wioski i dodaj do jednostek poza wioską
             setattr(attacker_army, f"{unit}_inside", getattr(attacker_army, f"{unit}_inside") - quantity)
-            setattr(attacker_army, f"{unit}_outside", getattr      (attacker_army, f"{unit}_outside", 0) + quantity)
+            setattr(attacker_army, f"{unit}_outside", getattr(attacker_army, f"{unit}_outside", 0) + quantity)
             attacker_army.save()
 
         # Oblicz czas podróży (funkcja calculate_travel_time musi być zdefiniowana)
@@ -488,7 +490,6 @@ from django.db import transaction
 def reports_view(request):
     # Retrieve all reports from the database
     reports = Reports.objects.all()
-
     # Pass the reports to the template
     return render(request, 'plemiona/reports.html', {'reports': reports})
 # -------------------------messages_logic------------------------------------------------

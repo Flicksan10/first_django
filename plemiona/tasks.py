@@ -12,7 +12,7 @@ from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.after_battle_logic import update_units_after_battle
 from .scipts_logic.return_attack_logic import handle_return_attack
 
-
+import logging
 # @shared_task
 @app.task
 def update_resources():

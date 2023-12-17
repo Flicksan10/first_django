@@ -2,6 +2,7 @@
 {% block content %}
 {% load custom_filters %}
 {% load static %}
+    <script src="{% static 'time_calculate.js' %}"></script>
 <link rel="stylesheet" href="{% static 'style.css' %}">
 <h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
 <h3><a href="{% url 'plemiona:village_detail' village.id %}">powrót do wioski</a></h3>
@@ -23,6 +24,7 @@
         <th>Typ Budynku</th>
         <th>Docelowy Poziom</th>
         <th>Czas Zakończenia</th>
+        <th>Pozostało</th>
         <th>Status</th>
     </tr>
     {% for task in building_tasks %}
@@ -30,6 +32,7 @@
         <td>{{ task.building_type }}</td>
         <td>{{ task.target_level }}</td>
         <td>{{ task.completion_time }}</td>
+        <td id="countdown-{{ forloop.counter }}" data-arrival-time="{{ task.completion_time|date:"Y-m-d H:i:s" }}"></td>
         <td>{{ task.is_active|yesno:"Aktywne,Oczekujące" }}</td>
     </tr>
     {% endfor %}

@@ -29,6 +29,6 @@ def calculate_travel_time(attacker_village, defender_village, army):
     slowest_speed = min(army_data[unit]['speed'] for unit in army if army[unit] > 0)
 
     # Oblicz czas podróży (przykładowa formuła, może wymagać dostosowania)
-    travel_time_seconds = distance * slowest_speed * 0.8  # Przykładowa konwersja na sekundy
+    travel_time_seconds = distance * slowest_speed * 0.1  # Przykładowa konwersja na sekundy
     print(travel_time_seconds)
     return travel_time_seconds

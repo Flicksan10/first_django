@@ -7,7 +7,9 @@ def handle_return_attack(task):
     # Dodaj przetrwałe jednostki do armii wewnątrz wioski
     for unit, quantity in surviving_units.items():
         current_quantity_inside = getattr(attacker_army, f"{unit}_inside", 0)
+        current_quantity_outside = getattr(attacker_army, f"{unit}_outside", 0)
         setattr(attacker_army, f"{unit}_inside", current_quantity_inside + quantity)
+        setattr(attacker_army, f"{unit}_outside", current_quantity_outside - quantity)
 
     # Dodaj zdobyte surowce do zasobów wioski
     attacker_village.resources.wood += looted_resources.get('wood', 0)

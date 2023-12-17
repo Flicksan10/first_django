@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 
 from plemiona.army_data import army_data
@@ -24,7 +26,10 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
             setattr(defender_village.army, f"{unit}_inside", max(current_count - count, 0))
         loot = calculate_loot(battle_result, army_data, defender_village)
         create_return_task(attacker_village, defender_village, battle_result, loot)
+
+        print("zebrano tyle", loot)
     else:
+        loot: {}
         # Obrońca wygrywa
         for unit, count in units_to_attack.items():
             current_count = getattr(attacker_village.army, f"{unit}_outside", 0)
@@ -35,17 +40,16 @@ def update_units_after_battle(attacker_village_id, defender_village_id, units_to
             current_count = getattr(defender_village.army, f"{unit}_inside", 0)
             setattr(defender_village.army, f"{unit}_inside", max(current_count - loss, 0))
 
-    save_battle_report(attacker_village.id, defender_village.id, units_to_attack, defender_units, winner, battle_result, loot)
+    save_battle_report(attacker_village.id, defender_village.id, units_to_attack, defender_units, winner, battle_result,
+                       loot)
 
     # Zapisz zmiany w bazie danych
     attacker_village.army.save()
     defender_village.army.save()
 
 
-
-
 def save_battle_report(attacker_village_id, defender_village_id, units_to_attack, defender_units, winner,
-                       battle_result, loot= {} ):
+                       battle_result, loot):
     # Retrieve the village instances
     attacker_village = Village.objects.get(id=attacker_village_id)
     defender_village = Village.objects.get(id=defender_village_id)
@@ -57,7 +61,7 @@ def save_battle_report(attacker_village_id, defender_village_id, units_to_attack
     else:
         winner_user = defender_village.user
         loser_user = attacker_village.user
-
+    logging.warning('Watch outs!')
     # Create a new Reports instance
     report = Reports(
         attacker_user=attacker_village.user,
@@ -69,7 +73,7 @@ def save_battle_report(attacker_village_id, defender_village_id, units_to_attack
         result=battle_result,
         winner=winner_user,
         loser=loser_user,
-        loot=loot,
+        loot=loot
     )
 
     # Save the Reports instance
