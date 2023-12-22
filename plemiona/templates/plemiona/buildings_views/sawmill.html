@@ -1,0 +1,32 @@
+{% extends "plemiona/base.html" %}
+
+{% block content %}
+<div class="building-background sawmill-background">
+    <h2>Tartak - {{ village.village_name }}</h2>
+    <table class="building-table">
+        <thead>
+            <tr>
+                <th>Poziom</th>
+                <th>Wydobycie</th>
+                <th>Koszt Drewna</th>
+                <th>Koszt Gliny</th>
+                <th>Koszt Żelaza</th>
+                <th>Koszt Ludzi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Załóżmy, że masz funkcję w Pythonie, która generuje te dane -->
+            {% for level in next_levels %}
+            <tr>
+                <td>{{ level.level }}</td>
+                <td>{{ level.performance }} / h</td>
+                <td>{{ level.wood_cost }}</td>
+                <td>{{ level.clay_cost }}</td>
+                <td>{{ level.iron_cost }}</td>
+                <td>{{ level.people_needed }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

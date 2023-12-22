@@ -1,7 +1,6 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
-    {% load static %}
-    <script src="{% static 'time_calculate.js' %}"></script>
+{% load static %}
 
     {% if village.user == request.user %}
         <!-- Pełne informacje dla właściciela wioski -->
@@ -71,19 +70,18 @@
             </div>
             <!-- Powtórz dla innych elementów -->
         </div>
-         <div class="village-info">
+         <div class="village-details">
              <ul>
                 <li><a href="{% url 'plemiona:town_hall_view' village.id %}">Ratusz: {{ village.town_hall }}</a></li>
                 <li><a href="{% url 'plemiona:barracks_view' village.id %}">Koszary: {{ village.barracks }}</a></li>
                 <li><a href="{% url 'plemiona:place_view' village.id %}">Plac: [Twoje dane]</a></li>
-                <li>Spichlerz: {{ village.granary }}</li>
-                <li>Zagroda: {{ village.farm }}</li>
-                <li>Schowek: {{ village.cache }}</li>
-                <li>Kuźnia: {{ village.forge }}</li>
-                <li>Rynek: {{ village.market }}</li>
-                <li>Tartak: {{ village.sawmill }}</li>
-                <li>Kopalnia Żelaza: {{ village.iron_mine }}</li>
-                <li>Kopalnia Gliny: {{ village.clay_pit }}</li>
+                <li>Eagle warrior: {{ village.army.pikemen_inside }}</li>
+                <li>Big shield: {{ village.army.halberdiers_inside }}</li>
+                <li>Maya archer: {{ village.army.archer_inside }}</li>
+                <li>Jaguar warrior: {{ village.army.axeman_inside }}</li>
+                <li>mercenary_cavalry: {{ village.army.light_cavalry_inside }}</li>
+                <li>mercenary_archer_cavalry {{ village.army.archer_cavalry_inside }}</li>
+                <li>Conquistador: {{ village.army.heavy_cavalry_inside}}</li>
             </ul>
          </div>
     </div>

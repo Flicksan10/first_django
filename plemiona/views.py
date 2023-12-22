@@ -610,3 +610,42 @@ def notifications_view(request):
 
 
 
+#---------------------------------------Views for building without functions--------------------------
+def get_building_data(building_name, current_level):
+    building_data = buildings_data_dict.get(building_name, {})
+
+    next_levels = []
+    for i in range(current_level, current_level + 5):
+        level_data = building_data.get(i)
+        if level_data:
+            next_levels.append({
+                'level': i,
+                'wood_cost': level_data['wood'],
+                'clay_cost': level_data['clay'],
+                'iron_cost': level_data['iron'],
+                'people_needed': level_data['people_needed'],
+                'performance': level_data['performance']
+            })
+    return next_levels
+
+
+def sawmill_view(request, village_id):
+    village = get_object_or_404(Village, id=village_id)  # Pobierz wioskę
+    current_level = village.sawmill  # Pobierz aktualny poziom tartaku z modelu Village
+    next_levels = get_building_data('sawmill', current_level)
+    return render(request, 'plemiona/buildings_views/sawmill.html', {'next_levels': next_levels, 'village': village})
+
+def clay_pit_view(request, village_id):
+    village = get_object_or_404(Village, id=village_id)
+    current_level = village.clay_pit
+    next_levels = get_building_data('clay_pit', current_level)
+    return render(request, 'plemiona/buildings_views/clay_pit.html', {'next_levels': next_levels, 'village': village})
+
+def iron_mine_view(request, village_id):
+    village = get_object_or_404(Village, id=village_id)
+    current_level = village.iron_mine
+    next_levels = get_building_data('iron_mine', current_level)
+    return render(request, 'plemiona/buildings_views/iron_mine.html', {'next_levels': next_levels, 'village': village})
+
+
+

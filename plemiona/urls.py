@@ -9,7 +9,8 @@ app_name = "plemiona"
 # urlpatterns = [
 #     path('', village_list, name='village_list'),
 # ]
-from .views import get_user_village, register, create_village_for_user, CustomLoginView, send_message
+from .views import get_user_village, register, create_village_for_user, CustomLoginView, send_message, sawmill_view, \
+    clay_pit_view, iron_mine_view
 
 urlpatterns = [
     path('admin/create_village/', views.admin_create_village, name='admin_create_village'),
@@ -32,6 +33,9 @@ urlpatterns = [
     path('send_message/', views.send_message, name='send_message'),
     path('notifications/', views.notifications_view, name='notifications_view'),
     path('reports/', views.reports_view, name='reports'),
+    path('village/<int:village_id>/sawmill/', sawmill_view, name='sawmill_view'),
+    path('village/<int:village_id>/clay_pit/', clay_pit_view, name='clay_pit_view'),
+    path('village/<int:village_id>/iron_mine/', iron_mine_view, name='iron_mine_view'),
 
 ]
 # #
