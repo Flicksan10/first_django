@@ -6,68 +6,79 @@
         <!-- Pełne informacje dla właściciela wioski -->
      <div class="container">
         <div class="game-board" >
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-town_hall game-piece" >
                 <div class="building-name">Ratusz</div>
                 <div class="building-level">{{ village.town_hall }}</div>
                 <img src="{% static 'village_buildings/town_hall.png' %}" alt="Wioska" class="foreground-image">
+
             </div>
+                </a>
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-granary game-piece" >
                 <div class="building-name">spichlerz</div>
                 <div class="building-level">{{ village.granary }}</div>
                 <img src="{% static 'village_buildings/granary_1.png' %}" alt="Wioska" class="foreground-image">
 
             </div>
+                </a>
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-forge game-piece">
                 <div class="building-name">kuznia</div>
                 <div class="building-level">{{ village.forge }}</div>
                 <img src="{% static 'village_buildings/forge_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
-
+                </a>
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-market game-piece">
                 <div class="building-name">Rynek</div>
                 <div class="building-level">{{ village.market }}</div>
                 <img src="{% static 'village_buildings/market_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
-
+                </a>
+            <a href="{% url 'plemiona:barracks_view' village.id %}">
             <div class="game-piece-barrack game-piece" >
                 <div class="building-name">Koszary</div>
                 <div class="building-level">{{ village.barracks }}</div>
                 <img src="{% static 'village_buildings/barrack_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
-
+                </a>
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-stable game-piece" >
                 <div class="building-name">Stajnia</div>
                 <div class="building-level">{{ village.stable }}</div>
                 <img src="{% static 'village_buildings/stable.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
+                </a>
+            <a href="{% url 'plemiona:town_hall_view' village.id %}">
             <div class="game-piece-farm game-piece" >
                 <div class="building-name">Gospoda</div>
                 <div class="building-level">{{ village.farm }}</div>
                 <img src="{% static 'village_buildings/farm_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
+            </a>
+
+            <a href="{% url 'plemiona:iron_mine_view' village.id %}">
             <div class="game-piece-iron_mine game-piece" >
                 <div class="building-name">Kopalnia żelaza</div>
                 <div class="building-level">{{ village.iron_mine }}</div>
                 <img src="{% static 'village_buildings/iron_mine.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
+            </a>
+            <a href="{% url 'plemiona:clay_pit_view' village.id %}">
             <div class="game-piece-clay_pit game-piece">
                 <div class="building-name">Kopalnie Gliny</div>
                 <div class="building-level">{{ village.clay_pit  }}</div>
                 <img src="{% static 'village_buildings/clay_pit_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
+            </a>
+             <a href="{% url 'plemiona:sawmill_view' village.id %}">
             <div class="game-piece-sawmill game-piece">
                 <div class="building-name">Tartak</div>
                 <div class="building-level">{{ village.sawmill }}</div>
                 <img src="{% static 'village_buildings/sawmill_1.png' %}" alt="Wioska" class="foreground-image">
-
             </div>
+             </a>
             <!-- Powtórz dla innych elementów -->
         </div>
          <div class="village-details">

@@ -369,3 +369,14 @@ tr:hover {
 .building-table thead {
     background: linear-gradient(to right, brown, green);
 }
+.game-piece:hover .foreground-image {
+    opacity: 0.8; /* lub inny efekt, np. dodanie cienia, zmiana koloru itp. */
+}
+
+.game-piece a {
+    text-decoration: none; /* Usuwa podkreślenie */
+    color: inherit; /* Zachowuje kolor tekstu z rodzica */
+}
+.building-name, .building-level {
+    color: black; /* lub inny kolor, który chcesz użyć */
+}
