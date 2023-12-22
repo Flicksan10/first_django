@@ -211,7 +211,7 @@ tr:hover {
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.5s ease;
-    position:static   ; /* Zmiana z absolute na fixed wpywa na to gdzie informacja o wiosce sie wyswietla */
+    position:fixed   ; /* Zmiana z absolute na fixed wpywa na to gdzie informacja o wiosce sie wyswietla */
 }
 
 #village-info.visible {
