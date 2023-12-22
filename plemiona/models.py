@@ -12,18 +12,8 @@ class Village(models.Model):
     village_name = models.CharField(max_length=100, default='New Village')
     coordinate_x = models.IntegerField(default=1)
     coordinate_y = models.IntegerField(default=1)
-    pikemen = models.IntegerField(default=0)
-    halberdiers = models.IntegerField(default=0)
-    archer = models.IntegerField(default=0)
-    axeman = models.IntegerField(default=0)
-    light_cavalry = models.IntegerField(default=0)
-    archer_cavalry = models.IntegerField(default=0)
-    heavy_cavalry = models.IntegerField(default=0)
-    wood = models.FloatField(default=1000)
-    iron = models.FloatField(default=1000)
-    clay = models.FloatField(default=1000)
     town_hall = models.IntegerField(default=1)
-    barracks = models.IntegerField(default=0)
+    barracks = models.IntegerField(default=1)
     granary = models.IntegerField(default=1)
     farm = models.IntegerField(default=1)
     sawmill = models.IntegerField(default=1)
@@ -34,16 +24,8 @@ class Village(models.Model):
     forge = models.IntegerField(default=0)
     market = models.IntegerField(default=0)
     wall = models.IntegerField(default=0)
-    cache = models.IntegerField(default=0)
+    cache = models.IntegerField(default=1)
     palace = models.IntegerField(default=0)
-    population_total = models.IntegerField(default=0)
-    population_buildings = models.IntegerField(default=0)
-    population_army = models.IntegerField(default=0)
-
-    #     raports = models.CharField(max_length=10000, default='New Village')
-
-
-
 
     def __str__(self):
         return self.village_name
@@ -61,12 +43,69 @@ class Village(models.Model):
     class Meta:
         unique_together = ('coordinate_x', 'coordinate_y')
 
+class Army(models.Model):
+    village = models.OneToOneField(Village, on_delete=models.CASCADE, related_name='army')
+    pikemen_inside = models.IntegerField(default=0)
+    pikemen_outside = models.IntegerField(default=0)
+    halberdiers_inside = models.IntegerField(default=0)
+    halberdiers_outside = models.IntegerField(default=0)
+    archer_inside = models.IntegerField(default=0)
+    archer_outside = models.IntegerField(default=0)
+    axeman_inside = models.IntegerField(default=0)
+    axeman_outside = models.IntegerField(default=0)
+    light_cavalry_inside = models.IntegerField(default=0)
+    light_cavalry_outside = models.IntegerField(default=0)
+    archer_cavalry_inside = models.IntegerField(default=0)
+    archer_cavalry_outside = models.IntegerField(default=0)
+    heavy_cavalry_inside = models.IntegerField(default=0)
+    heavy_cavalry_outside = models.IntegerField(default=0)
+
+
+class ArmyHelp(models.Model):
+    supporting_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='sent_support')
+    receiving_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='received_support')
+    pikemen = models.IntegerField(default=0)
+    halberdiers = models.IntegerField(default=0)
+    archer = models.IntegerField(default=0)
+    axeman = models.IntegerField(default=0)
+    light = models.IntegerField(default=0)
+    archer_cavalry = models.IntegerField(default=0)
+    heavy_cavalry = models.IntegerField(default=0)
+
+class VillageResources(models.Model):
+    village = models.OneToOneField('Village', on_delete=models.CASCADE, related_name='resources')
+    wood = models.FloatField(default=1000)
+    wood_bonus = models.FloatField(default=0)
+    clay = models.FloatField(default=1000)
+    clay_bonus = models.FloatField(default=0)
+    iron = models.FloatField(default=1000)
+    iron_bonus = models.FloatField(default=0)
+
+    def __str__(self):
+        return f"Resources for {self.village.village_name}"
+
 # class Choice(models.Model):
 #     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 #     choice_text = models.CharField(max_length=200)
 #     votes = models.IntegerField(default=0)
 #     def __str__(self):              # __unicode__ on Python 2
 #         return self.choice_text
+
+class BuildingProperties(models.Model):
+    village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='building_properties')
+    building_type = models.CharField(max_length=100)
+    level = models.IntegerField(default=1)
+    performance = models.IntegerField(default=0)
+    bonus = models.IntegerField(default=0)
+    # Możesz dodać więcej dynamicznych pól, jeśli są potrzebne
+
+    def __str__(self):
+        return f"{self.building_type} properties for {self.village.village_name}"
+
+    class Meta:
+        unique_together = ('village', 'building_type')
+
+
 
 class Reports(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -129,3 +168,30 @@ class Notification(models.Model):
     def __str__(self):
         return f"Powiadomienie dla {self.user.username}"
 
+class BuildingTask(models.Model):
+    village = models.ForeignKey(Village, on_delete=models.CASCADE)
+    building_type = models.CharField(max_length=100)
+    target_level = models.IntegerField()
+    completion_time = models.DateTimeField()
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Budowa {self.building_type} do poziomu {self.target_level} w {self.village.village_name} kończy się o {self.completion_time}"
+
+
+class ArmyTask(models.Model):
+    ACTION_CHOICES = [
+        ('attack', 'Attack'),
+        ('return_attack', 'Return from Attack'),
+        ('defense_send', 'Send Defense'),
+        ('defense_return', 'Return Defense'),
+        # Dodaj więcej opcji według potrzeb
+    ]
+
+    attacker_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='attacking_armies')
+    defender_village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='defending_armies')
+    army_composition = models.JSONField()  # Przechowuje skład armii
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
+    action_type = models.CharField(max_length=20, choices=ACTION_CHOICES,default='attack')
+    looted_resources = models.JSONField(default=dict)

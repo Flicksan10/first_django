@@ -2,6 +2,7 @@
 {% block content %}
 {% load custom_filters %}
 {% load static %}
+    <script src="{% static 'time_calculate.js' %}"></script>
 <link rel="stylesheet" href="{% static 'style.css' %}">
 <h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
 <h3><a href="{% url 'plemiona:village_detail' village.id %}">powrót do wioski</a></h3>
@@ -12,12 +13,36 @@
     <strong>Brakuje:</strong> {{ missing_resources|join:", " }}
   </div>
 {% endif %}
-
+{% if error_message %}
+<div class="missing-resources">
+    {{ error_message }}
+</div>
+{% endif %}
+<h3>Zadania Budowy</h3>
+<table>
+    <tr>
+        <th>Typ Budynku</th>
+        <th>Docelowy Poziom</th>
+        <th>Czas Zakończenia</th>
+        <th>Pozostało</th>
+        <th>Status</th>
+    </tr>
+    {% for task in building_tasks %}
+    <tr>
+        <td>{{ task.building_type }}</td>
+        <td>{{ task.target_level }}</td>
+        <td>{{ task.completion_time }}</td>
+        <td id="countdown-{{ forloop.counter }}" data-arrival-time="{{ task.completion_time|date:"Y-m-d H:i:s" }}"></td>
+        <td>{{ task.is_active|yesno:"Aktywne,Oczekujące" }}</td>
+    </tr>
+    {% endfor %}
+</table>
 <table>
   <thead>
     <tr>
       <th>Budynek</th>
       <th>Aktualny Poziom</th>
+      <th>czas budowy</th>
       <th><img src="{% static 'images/wood.jpg' %}" alt="Drewno"  class="resource-icon"> Drewno {{ data.wood }}</th>
       <th>  <img src="{% static 'images/clay.jpg' %}" alt="Glina" class="resource-icon"> Glina {{ data.clay }}</th>
       <th><img src="{% static 'images/iron.jpg' %}" alt="Żelazo" class="resource-icon"> Żelazo {{ data.iron }}</th>
@@ -30,6 +55,7 @@
         <td>{{ building|capfirst }}</td>
         {% if data %}
           <td>{{ village|get_attribute:building }}</td>
+          <td>{{ data.build_time}}</td>
           <td>{{ data.wood }}</td>
           <td>{{ data.clay }}</td>
           <td>{{ data.iron }}</td>

@@ -26,3 +26,8 @@ import math
 @register.filter
 def floor(value):
     return math.floor(value)
+
+
+@register.filter(name='get_from_dict')
+def get_from_dict(dictionary, key):
+    return dictionary.get(key)

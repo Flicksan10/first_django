@@ -1,61 +1,119 @@
 {% extends "plemiona/base.html" %}
 {% block content %}
+{% load static %}
 
     {% if village.user == request.user %}
-        <h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
-
-        <h2>Twoja Wioska</h2>
-        <h3>Nazwa: {{ village.village_name }}</h3>
-        <p>Koordynaty: ({{ village.coordinate_x }}, {{ village.coordinate_y }})</p>
-
         <!-- Pełne informacje dla właściciela wioski -->
-        <table>
-            <thead>
-                <tr>
-                    <th><a href="{% url 'plemiona:town_hall_view' village.id %}">Ratusz</a></th>
-                    <th><a href="{% url 'plemiona:barracks_view' village.id %}">Koszary</a></th>
-                    <th><a href="{% url 'plemiona:place_view' village.id %}">PLac</a></th>
-                    <th>Pikinierzy</th>
-                    <th>Halabardnicy</th>
-                    <th>Łucznik</th>
-                    <th>Topornik</th>
-                    <th>lekki kawalerzysta</th>
-                    <th>łucznik konny</th>
-                    <th>ciężki kawalerzysta</th>
-                    <th>Spichlerz</th>
-                    <th>Zagroda</th>
-                    <th>schowek</th>
-                    <th>kuźnia</th>
-                    <th>rynek</th>
-                    <th>Tartak</th>
-                    <th>Kopalnia Żelaza</th>
-                    <th>Kopalnia Gliny</th>
+     <div class="container">
+        <div class="game-board" >
+            <div class="game-piece-town_hall game-piece" >
+                <div class="building-name">Ratusz</div>
+                <div class="building-level">{{ village.town_hall }}</div>
+                <img src="{% static 'village_buildings/town_hall.png' %}" alt="Wioska" class="foreground-image">
+            </div>
+            <div class="game-piece-granary game-piece" >
+                <div class="building-name">spichlerz</div>
+                <div class="building-level">{{ village.granary }}</div>
+                <img src="{% static 'village_buildings/granary_1.png' %}" alt="Wioska" class="foreground-image">
 
+            </div>
+            <div class="game-piece-forge game-piece">
+                <div class="building-name">kuznia</div>
+                <div class="building-level">{{ village.forge }}</div>
+                <img src="{% static 'village_buildings/forge_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+
+            <div class="game-piece-market game-piece">
+                <div class="building-name">Rynek</div>
+                <div class="building-level">{{ village.market }}</div>
+                <img src="{% static 'village_buildings/market_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+
+            <div class="game-piece-barrack game-piece" >
+                <div class="building-name">Koszary</div>
+                <div class="building-level">{{ village.barracks }}</div>
+                <img src="{% static 'village_buildings/barrack_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+
+            <div class="game-piece-stable game-piece" >
+                <div class="building-name">Stajnia</div>
+                <div class="building-level">{{ village.stable }}</div>
+                <img src="{% static 'village_buildings/stable.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+            <div class="game-piece-farm game-piece" >
+                <div class="building-name">Gospoda</div>
+                <div class="building-level">{{ village.farm }}</div>
+                <img src="{% static 'village_buildings/farm_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+            <div class="game-piece-iron_mine game-piece" >
+                <div class="building-name">Kopalnia żelaza</div>
+                <div class="building-level">{{ village.iron_mine }}</div>
+                <img src="{% static 'village_buildings/iron_mine.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+            <div class="game-piece-clay_pit game-piece">
+                <div class="building-name">Kopalnie Gliny</div>
+                <div class="building-level">{{ village.clay_pit  }}</div>
+                <img src="{% static 'village_buildings/clay_pit_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+            <div class="game-piece-sawmill game-piece">
+                <div class="building-name">Tartak</div>
+                <div class="building-level">{{ village.sawmill }}</div>
+                <img src="{% static 'village_buildings/sawmill_1.png' %}" alt="Wioska" class="foreground-image">
+
+            </div>
+            <!-- Powtórz dla innych elementów -->
+        </div>
+         <div class="village-details">
+             <ul>
+                <li><a href="{% url 'plemiona:town_hall_view' village.id %}">Ratusz: {{ village.town_hall }}</a></li>
+                <li><a href="{% url 'plemiona:barracks_view' village.id %}">Koszary: {{ village.barracks }}</a></li>
+                <li><a href="{% url 'plemiona:place_view' village.id %}">Plac: [Twoje dane]</a></li>
+                <li>Eagle warrior: {{ village.army.pikemen_inside }}</li>
+                <li>Big shield: {{ village.army.halberdiers_inside }}</li>
+                <li>Maya archer: {{ village.army.archer_inside }}</li>
+                <li>Jaguar warrior: {{ village.army.axeman_inside }}</li>
+                <li>mercenary_cavalry: {{ village.army.light_cavalry_inside }}</li>
+                <li>mercenary_archer_cavalry {{ village.army.archer_cavalry_inside }}</li>
+                <li>Conquistador: {{ village.army.heavy_cavalry_inside}}</li>
+            </ul>
+         </div>
+    </div>
+
+
+        {#    <p><img src="{% static 'village_buildings/building_1.png' %}" alt="Wioska" class="foreground-image"></p>#}
+        {% if army_tasks %}
+            <h3>Zadania Armii</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Typ Zadania</th>
+                    <th>Wioska Broniąca</th>
+                    <th>Czas Wyjścia</th>
+                    <th>Czas Przybycia</th>
+                    <th>Pozostały Czas</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
+                {% for task in army_tasks %}
                     <tr>
-                        <td>{{ village.town_hall }}</td>
-                        <td>{{ village.barracks }}</td>
-                        <td>plac</td>
-                        <td>{{ village.pikemen }}</td>
-                        <td>{{ village.halberdiers }}</td>
-                        <td>{{ village.archer }}</td>
-                        <td>{{ village.axeman }}</td>
-                        <td>{{ village.light_cavalry }}</td>
-                        <td>{{ village.archer_cavalry }}</td>
-                        <td>{{ village.heavy_cavalry }}</td>
-                        <td>{{ village.granary }}</td>
-                        <td>{{ village.farm }}</td>
-                        <td>{{ village.cache }}</td>
-                        <td>{{ village.forge }}</td>
-                        <td>{{ village.market }}</td>
-                        <td>{{ village.sawmill }}</td>
-                        <td>{{ village.iron_mine }}</td>
-                        <td>{{ village.clay_pit }}</td>
+                        <td>{{ task.get_action_type_display }}</td>
+                        <td>{{ task.defender_village.village_name }}</td>
+                        <td>{{ task.departure_time }}</td>
+                        <td>{{ task.arrival_time }}</td>
+                        <td id="countdown-{{ forloop.counter }}"
+                            data-arrival-time="{{ task.arrival_time|date:"Y-m-d H:i:s" }}"></td>
                     </tr>
-            </tbody>
-        </table>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
     {% else %}
         <h2>Nazwa: {{ village.user }}</h2>
         <h3>Nazwa: {{ village.village_name }}</h3>
@@ -64,3 +122,5 @@
         <!-- Możesz dodać więcej informacji tutaj, jeśli chcesz -->
     {% endif %}
 {% endblock %}
+
+

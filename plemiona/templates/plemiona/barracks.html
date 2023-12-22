@@ -27,7 +27,7 @@
       {% for unit, data in army_data.items %}
         <tr>
           <td>{{ unit|capfirst }}</td>
-          <td>{{ village|get_attribute:unit }}</td>
+          <td>{{ current_army|get_from_dict:unit }}</td>
           <td>{{ data.wood }}</td>
           <td>{{ data.clay }}</td>
           <td>{{ data.iron }}</td>
