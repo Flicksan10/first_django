@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -26,80 +28,7 @@ tr:hover {
     color: red;
     font-weight: bold;
   }
-/*.outer-container {*/
-/*    background-image: url('images/username_and_password_image_template_no_fields.jpg');*/
-/*    background-size: cover;*/
-/*    background-repeat: no-repeat;*/
-/*    background-position: center;*/
-/*    max-width: 1000px;*/
-/*    max-height: 1000px;*/
-/*    width: 100%;*/
-/*    height: 100vh;*/
-/*    margin: auto;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*}*/
 
-/*.login-form {*/
-/*    !*margin-top: 80px; !* Odstęp od góry kontenera *!*!*/
-/*    background-image: url('images/username_and_password_image.jpg');*/
-/*    background-size: cover;*/
-/*    max-width: 540px;*/
-/*    max-height: 340px;*/
-/*    width: 100%;*/
-/*    height: 100vh;*/
-/*    background-repeat: no-repeat;*/
-/*    background-position: center;*/
-/*    !* Dodaj więcej stylów CSS, aby dostosować wygląd formularza *!*/
-/*}*/
-
-/*.login-form label {*/
-/*    display: none; !* Ukrywa etykiety *!*/
-/*}*/
-/*.login-form input {*/
-/*    margin-bottom: 20px;}*/
-
-
-
-
-/*.background-container {*/
-/*    background-image: url('images/username_and_password_image_template_no_fields.jpg');*/
-/*    background-size: cover;*/
-/*    background-repeat: no-repeat;*/
-/*    background-position: center;*/
-/*    position: absolute;*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*}*/
-/*.login-form {*/
-/*    background-image: url('images/username_and_password_image.jpg');*/
-/*    max-width: 540px;*/
-/*    max-height: 340px;*/
-/*    width: 100%;*/
-/*    height: 100vh;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    position: relative; !* Dodane, aby umożliwić pozycjonowanie absolutne wewnątrz *!*/
-/*}*/
-/*.form-container {*/
-/*    z-index: 1; !* Upewnij się, że formularz jest na wierzchu *!*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*}*/
-
-/*.form-container input {*/
-/*    margin-bottom: 20px; !* Odstęp między polami formularza *!*/
-/*}*/
-
-/*.form-container label {*/
-/*    display: none; !* Ukrywa etykiety *!*/
-/*}*/
 .outer-container {
     background-image: url('images/username_and_password_image_template_no_fields.jpg');
     background-size: cover;
@@ -115,41 +44,6 @@ tr:hover {
     align-items: center;
 }
 
-/*.inner-container {*/
-/*    margin-bottom: -20px;*/
-
-/*    !*background-size: cover;*!*/
-/*    background-repeat: no-repeat;*/
-/*    background-position: center;*/
-/*    width: 545px;*/
-/*    height: 344px;*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*    flex-direction: column;*/
-/*}*/
-
-/*.inner-container input {*/
-/*    margin-bottom: 20px; !* Odstęp między polami formularza *!*/
-/*}*/
-
-/*.inner-container label {*/
-/*    display: none; !* Ukrywa etykiety *!*/
-/*}*/
-
-
-/*.form-field_name {*/
-/*    !*margin-bottom: 90px; !* Odstęp między polami formularza *!*!*/
-/*    padding-bottom: 100px;*/
-/*}*/
-
-/*.form-field_pass {*/
-/*   padding-bottom: 100px;*/
-/*}*/
-
-/*.form-field_submit {*/
-/*    padding-bottom: 100px;*/
-/*}*/
 
 .inner-container {
 
@@ -191,10 +85,7 @@ tr:hover {
     background: transparent;
     /*opacity: 0.1;*/
 }
-/*input[type="password"]{*/
-/*   width: 360px;  !* Szerokość przycisku *!*/
-/*    height: 40px;*/
-/*}*/
+
 .login-form_user_pass input[name="username"] {
     width: 400px;  /* Szerokość pola */
     height: 40px;  /* Wysokość pola */
@@ -208,10 +99,7 @@ tr:hover {
     /* Dodatkowe style, jeśli potrzebne, np. styl tekstu, obramowanie itp. */
 }
 
-/*input[type="text"]{*/
-/*   width: 360px;  !* Szerokość przycisku *!*/
-/*    height: 40px;*/
-/*}*/
+
 
 .resource-icon {
   width: 30px;
@@ -219,28 +107,6 @@ tr:hover {
   vertical-align: middle; /* Aby obraz był wyrównany z tekstem */
 }
 
-/*.map-table img {*/
-/*    width: 60px; !* lub inny pożądany rozmiar *!*/
-/*    height: 60px;*/
-/*}*/
-
-/*.map-table {*/
-/*    border-collapse: collapse; !* Usuwa odstępy między komórkami *!*/
-/*    width: 100%; !* Opcjonalnie, aby tabela zajmowała całą dostępną szerokość *!*/
-/*}*/
-
-/*.map-table td {*/
-/*    width: 60px; !* lub inny pożądany rozmiar *!*/
-/*    height: 60px;*/
-/*    padding: 0; !* Usuwa wewnętrzne odstępy komórek *!*/
-/*    margin:  0;*/
-/*}*/
-
-/*.map-icon {*/
-/*    display: block; !* Usuwa domyślny margines dolny obrazków *!*/
-/*    width: 100%; !* Szerokość obrazka dopasowana do szerokości komórki *!*/
-/*    height: auto; !* Wysokość obrazka zachowuje proporcje *!*/
-/*}*/
 .map-container {
     max-width: 600px;
     max-height: 600px;
@@ -338,42 +204,6 @@ tr:hover {
     top: 0; /* Dla numerów kolumn */
 }
 
-
-/*.tooltip {*/
-/*    visibility: hidden;*/
-/*    width: 120px;*/
-/*    background-color: black;*/
-/*    color: white;*/
-/*    text-align: center;*/
-/*    border-radius: 6px;*/
-/*    padding: 5px 0;*/
-/*    position: absolute;*/
-/*    z-index: 1;*/
-/*    bottom: 100%;*/
-/*    left: 50%;*/
-/*    margin-left: -60px;*/
-/*    opacity: 0;*/
-/*    transition: opacity 0.3s;*/
-/*}*/
-
-/*.village-link:hover .tooltip {*/
-/*    visibility: visible;*/
-/*    opacity: 1;*/
-/*}*/
-/*.background-image {*/
-/*    position: absolute;*/
-/*       width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
-/*    height: 50px; !* Wysokość obrazka ustawiona na 50px *!*/
-/*}*/
-
-/*.foreground-image {*/
-/*    position: absolute; !* Pozycjonowanie absolutne względem kontenera *!*/
-/*    top: 0; !* Ustawia obrazek na górze kontenera *!*/
-/*    left: 0; !* Ustawia obrazek na lewej stronie kontenera *!*/
-/*     width: 50px; !* Szerokość obrazka ustawiona na 50px *!*/
-/*    height: 50px; !* Wysokość obrazka ustawiona na 50px *!*/
-/*}*/
-
 #village-info {
     border: 1px solid #ccc;
     background-color: white;
@@ -381,9 +211,118 @@ tr:hover {
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.5s ease;
-    position: fixed; /* Zmiana z absolute na fixed wpywa na to gdzie informacja o wiosce sie wyswietla */
+    position:static   ; /* Zmiana z absolute na fixed wpywa na to gdzie informacja o wiosce sie wyswietla */
 }
 
 #village-info.visible {
     opacity: 1;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    width: 100%;
+    max-width: 1500px; /* Możesz dostosować szerokość */
+    /*margin: auto;*/
+}
+.village-info {
+    width: calc(100% - 768px); /* Reszta szerokości minus margines */
+    /*padding: 10px;*/
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.village-info ul {
+    list-style-type: none; /* Usuwa domyślne punktory listy */
+    padding: 0;
+}
+
+.village-info li {
+    margin-bottom: 10px; /* Odstęp między elementami listy */
+}
+.game-board {
+    position: relative;
+    width: 1200px;
+    height: 650px;
+    /*margin: 20px;*/
+    background-image: url('village_buildings/mapa_2.png');
+    background-repeat: no-repeat;
+    /*background-size: 751px 550px;*/
+}
+.game-piece{
+    width: 150px;
+    height: 150px;
+    position: absolute;
+}
+.game-piece-town_hall{
+    top: 25%;
+    left: 50%;
+}
+.game-piece-granary{
+    top: 25%;
+    left: 25%;
+
+}
+.game-piece-forge{
+    top: 50%;
+    left:25%;
+}
+.game-piece-market{
+    top: 66%;
+    left: 45%;
+}
+.game-piece-barrack{
+    top: 30%;
+    left: 75%;
+}
+.game-piece-stable{
+    top: 55%;
+    left: 65%;
+}
+.game-piece-farm{
+    top: 0%;
+    left: 80%;
+}
+.game-piece-iron_mine{
+    top: 0%;
+    left: 0%;
+}
+.game-piece-clay_pit{
+    top: 67%;
+    left: 0%;
+}
+.game-piece-sawmill{
+    top: 65%;
+    left: 80%;
+}
+.building-name {
+    background: linear-gradient(sandybrown,darkgreen);
+    border-radius: 5px; /* Zaokrąglone rogi */
+    border: 1px solid black; /* Czarna obwódka */
+    text-align: center; /* Wyśrodkowanie tekstu */
+    position: absolute;
+    top: 0%; /* Dostosuj położenie */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.building-level {
+    width: 35px;
+    height: 25px;
+    background: linear-gradient(sandybrown,yellow ); /* Gradient tła */
+    border-radius: 5px;
+    border: 1px solid black;
+    text-align: center;
+    position: absolute;
+    top: -17%; /* Dostosuj położenie */
+    left: 49%;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.building-name, .building-level {
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold; /* Pogrubienie tekstu */
 }
