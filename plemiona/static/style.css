@@ -380,3 +380,11 @@ tr:hover {
 .building-name, .building-level {
     color: black; /* lub inny kolor, który chcesz użyć */
 }
+
+.meets {
+    color: green;
+}
+
+.does-not-meet {
+    color: red;
+}

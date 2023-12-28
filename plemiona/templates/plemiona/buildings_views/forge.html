@@ -1,0 +1,39 @@
+{% extends "plemiona/base.html" %}
+{% load custom_filters %}
+
+{% block content %}
+<h2>Kuźnia - Badania</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Jednostka</th>
+      <th>Wymagania</th>
+      <th>Koszt drewna</th>
+      <th>Koszt gliny</th>
+      <th>Koszt żelaza</th>
+      <th>Czas badania</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for unit, data in units.items %}
+    <tr>
+      <td>{{ unit|capfirst }}</td>
+      <td>
+        {% for building, level in data.items %}
+          {% if building == 'wood' or building == 'clay' or building == 'iron' %}
+    <!-- Twój kod, jeśli building jest 'wood', 'clay' lub 'iron' -->
+          {% else %}
+            {{ building|capfirst }}: Lvl {{ level }}<br>
+          {% endif %}
+        {% endfor %}
+      </td>
+      <td>{{ data.wood }}</td>
+      <td>{{ data.clay }}</td>
+      <td>{{ data.iron }}</td>
+      <td>{{ research_times|get_from_dict:unit }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

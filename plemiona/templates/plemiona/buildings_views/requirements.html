@@ -1,0 +1,28 @@
+{% extends "plemiona/base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Building</th>
+      <th>Requirements</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for building, requirements in buildings_requirements.items %}
+    <tr>
+      <td>{{ building|capfirst }}</td>
+      <td>
+        {% for req_building, req_level in requirements.items %}
+          <span class="{% if village|get_attribute:req_building >= req_level %}meets{% else %}does-not-meet{% endif %}">
+            {{ req_building|capfirst }}: Lvl {{ req_level }}
+          </span><br>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

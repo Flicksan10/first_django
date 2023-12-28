@@ -15,12 +15,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
+from .buildings_data.building_req_function import check_building_requirements
+from .buildings_data.building_requirements import buildings_lvl_requirements
 from .buildings_data.create_village_scripts import \
     initialize_building_properties_new_village, calculate_performance_building
 from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages, \
     initialize_army_for_all_villages
 from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources, \
-    BuildingTask, ArmyTask, Army
+    BuildingTask, ArmyTask, Army, ResearchTask
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -30,6 +32,7 @@ from django.shortcuts import render, redirect
 import random
 from django.db import IntegrityError
 from .forms import CustomLoginForm
+from .research.research_requirements import units
 from .scipts_logic.after_battle_logic import save_battle_report
 from .scipts_logic.after_battle_return import calculate_travel_time
 from .scipts_logic.attack_logic import simulate_battle
@@ -238,6 +241,13 @@ def upgrade_building(request, village_id, building_type):
     village = get_object_or_404(Village, id=village_id, user=request.user)
     current_level = getattr(village, building_type)
     building_data = buildings_data_dict.get(building_type, {})
+    lvl_requirements = buildings_lvl_requirements
+    meets_requirements, message = check_building_requirements(village, building_type, lvl_requirements)
+    if not meets_requirements:
+        # Handle the case where requirements are not met
+        # For example, send a message back to the user
+        request.session['error_message'] = f"Nie spelniono Wymagan {message}"
+        return redirect('plemiona:town_hall_view', village_id=village_id)
 
     tasks_count = BuildingTask.objects.filter(village=village).count()
     if tasks_count >= 3:
@@ -649,3 +659,94 @@ def iron_mine_view(request, village_id):
 
 
 
+def building_requirements(request, village_id):
+    village = get_object_or_404(Village, pk=village_id)
+    # Assume buildings_lvl_requirements is accessible as a global or passed in some way
+    context = {
+        'village': village,
+        'buildings_requirements': buildings_lvl_requirements,
+        # Add more context data as needed
+    }
+    return render(request, 'plemiona/buildings_views/requirements.html', context)
+
+# calculate can be partly done in front end, backend will anyway calculate it on his side after post request
+def forge_view(request, village_id):
+    materials = ['wood', 'clay', 'iron']
+    village = get_object_or_404(Village, pk=village_id)
+    forge_level = getattr(village, 'forge', 0)  # Pobierz poziom kuźni z modelu Village
+    forge_performance = buildings_data_dict['forge'][forge_level]['performance']/100  # Pobierz performance dla poziomu kuźni
+
+    # Oblicz czas badania dla każdej jednostki
+    research_times = {}
+    for unit, data in units.items():
+        total_cost = data['wood'] + data['clay'] + data['iron']
+        research_time = total_cost * forge_performance  # Możesz dostosować wzór obliczeń
+        research_time_converted = convert_seconds_to_time(research_time)
+        research_times[unit] = research_time_converted
+
+    print(research_times)
+
+    context = {
+        'village': village,
+        'units': units,
+        'research_times': research_times,
+        'materials': materials
+    }
+    return render(request, 'plemiona/buildings_views/forge.html', context)
+
+
+def start_research(request, village_id, research_type):
+    village = get_object_or_404(Village, id=village_id, user=request.user)
+    research_data = units[research_type]  # Pobierz dane badania z twojego słownika
+    current_research_status = getattr(village, research_type, False)  # Sprawdź, czy badanie zostało już wykonane
+
+    if current_research_status:
+        # Badanie zostało już wykonane
+        request.session['error_message'] = "Badanie zostało już wykonane."
+        return redirect('plemiona:forge_view', village_id=village_id)
+
+    # Sprawdź, czy spełnione są wymagania do rozpoczęcia badania
+    # meets_requirements, message = check_research_requirements(village, research_type, research_data)
+    # if not meets_requirements:
+    #     request.session['error_message'] = f"Nie spełniono wymagań: {message}"
+    #     return redirect('plemiona:forge_view', village_id=village_id)
+
+    # Sprawdź, czy są dostępne zasoby
+    if (village.resources.wood >= research_data["wood"] and
+            village.resources.clay >= research_data["clay"] and
+            village.resources.iron >= research_data["iron"]):
+
+        # Oblicz czas badania
+        forge_performance = buildings_data_dict['forge'][village.forge]['performance']
+        total_resources_cost = research_data["wood"] + research_data["clay"] + research_data["iron"]
+        research_time_seconds = round((total_resources_cost * forge_performance) / 100)
+        completion_time = timezone.now() + timezone.timedelta(seconds=research_time_seconds)
+
+        # Odejmij zasoby
+        village.resources.wood -= research_data["wood"]
+        village.resources.clay -= research_data["clay"]
+        village.resources.iron -= research_data["iron"]
+        village.resources.save()
+
+        # Zapisanie zadania badawczego w tabeli
+        ResearchTask.objects.create(
+            village=village,
+            research_type=research_type,
+            completion_time=completion_time
+        )
+
+        return redirect('plemiona:forge_view', village_id=village_id)
+
+    else:
+        # Nie wystarczające zasoby
+        missing_resources = []
+        if village.resources.wood < research_data['wood']:
+            missing_resources.append('drewno')
+        if village.resources.clay < research_data['clay']:
+            missing_resources.append('glina')
+        if village.resources.iron < research_data['iron']:
+            missing_resources.append('żelazo')
+
+        if missing_resources:
+            request.session['missing_resources'] = missing_resources
+            return redirect('plemiona:forge_view', village_id=village_id)

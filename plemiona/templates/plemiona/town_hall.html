@@ -4,8 +4,8 @@
 {% load static %}
     <script src="{% static 'time_calculate.js' %}"></script>
 <link rel="stylesheet" href="{% static 'style.css' %}">
-<h4><a href="{% url 'plemiona:get_user_village' %}">Wszystkie_wiochy</a></h4>
-<h3><a href="{% url 'plemiona:village_detail' village.id %}">powrót do wioski</a></h3>
+{#<h4><a href="{% url 'plemiona:get_user_village' %}">Wymagania budynkow</a></h4>#}
+<h3><a href="{% url 'plemiona:building_requirements' village.id %}">Wymagania budynków</a></h3>
 <h3>{{ village.village_name }}</h3>
 
 {% if missing_resources %}

@@ -195,3 +195,25 @@ class ArmyTask(models.Model):
     arrival_time = models.DateTimeField()
     action_type = models.CharField(max_length=20, choices=ACTION_CHOICES,default='attack')
     looted_resources = models.JSONField(default=dict)
+
+class Research(models.Model):
+    village = models.OneToOneField('Village', on_delete=models.CASCADE, related_name='research')
+    pikemen = models.BooleanField(default=False)
+    halberdiers = models.BooleanField(default=False)
+    axeman = models.BooleanField(default=False)
+    archer = models.BooleanField(default=False)
+    light_cavalry = models.BooleanField(default=False)
+    archer_cavalry = models.BooleanField(default=False)
+    heavy_cavalry = models.BooleanField(default=False)
+    catapult = models.BooleanField(default=False)
+    ram = models.BooleanField(default=False)
+    ballista = models.BooleanField(default=False)
+
+class ResearchTask(models.Model):
+    village = models.ForeignKey(Village, on_delete=models.CASCADE, related_name='research_tasks')
+    research_type = models.CharField(max_length=100)  # np. 'pikemen', 'halberdiers', etc.
+    completion_time = models.DateTimeField()
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Badanie {self.research_type} w {self.village.village_name} kończy się o {self.completion_time}"
