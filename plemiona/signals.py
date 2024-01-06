@@ -4,12 +4,6 @@ from django.conf import settings
 from .models import Village, Answers_Message, Notification
 from django.contrib.auth.models import User
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_village_for_new_user(sender, instance, created, **kwargs):
-    if created:
-        Village.objects.create(user=instance)
-
-
 @receiver(post_save, sender=Answers_Message)
 def create_notification_on_reply(sender, instance, created, **kwargs):
     if created:
@@ -25,3 +19,10 @@ def create_notification_on_reply(sender, instance, created, **kwargs):
         # Update the last_notification_receiver field in the MessageThread model
         instance.last_notification_receiver = recipient
         instance.save()
+
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_village_for_new_user(sender, instance, created, **kwargs):
+#     if created:
+#         Village.objects.create(user=instance)
