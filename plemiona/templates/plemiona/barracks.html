@@ -9,7 +9,13 @@
     <strong>Brakuje:</strong> {{ missing_resources_units|join:", " }}
   </div>
 {% endif %}
-
+{% if messages %}
+<div class="missing-resources">
+    {% for message in messages %}
+    <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
 <form action="{% url 'plemiona:recruit_units' village.id %}" method="post">
   {% csrf_token %}
   <table>

@@ -17,5 +17,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\Radek_mp\PycharmProjects\djangoProject1\db.sqlite3</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="plemiona_1@localhost" uuid="d1e81053-4630-4e9d-9f0f-29cca6a26281">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5433/plemiona_1</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

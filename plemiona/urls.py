@@ -38,6 +38,8 @@ urlpatterns = [
     path('village/<int:village_id>/iron_mine/', iron_mine_view, name='iron_mine_view'),
     path('village/<int:village_id>/requirements/', views.building_requirements, name='building_requirements'),
     path('village/<int:village_id>/forge/', views.forge_view, name='forge_view'),
+    path('village/<int:village_id>/start_research/<str:research_type>/', views.start_research, name='start_research'),
+
 
 ]
 # #

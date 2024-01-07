@@ -1,0 +1,2 @@
+celery -A djangoProject1 beat --loglevel=info
+celery -A djangoProject1 worker --loglevel=info

@@ -6,7 +6,7 @@ from djangoProject1.celery import app
 from .army_data import army_data
 from .buildings_data.buildings import buildings_data_dict
 # from .buildings_data import buildings
-from .models import Village, BuildingProperties, BuildingTask, ArmyTask
+from .models import Village, BuildingProperties, BuildingTask, ArmyTask, ResearchTask
 from .scipts_logic.after_battle_return import create_return_task
 from .scipts_logic.attack_logic import simulate_battle
 from .scipts_logic.after_battle_logic import update_units_after_battle
@@ -156,3 +156,21 @@ def process_attacks():
             elif task.action_type == 'return_attack':
                 handle_return_attack(task)
 
+@app.task
+def check_research_tasks():
+    with transaction.atomic():
+        for task in ResearchTask.objects.filter(completion_time__lte=timezone.now(), is_active=True):
+            village = task.village
+
+            # Update the research status in the Research model
+
+            setattr(village, task.research_type, True)
+            village.save()
+            # Usuń wykonane zadanie
+            task.delete()
+
+            # Activate the next task, if exists
+            next_task = ResearchTask.objects.filter(village=task.village, is_active=False).order_by('completion_time').first()
+            if next_task:
+                next_task.is_active = True
+                next_task.save()

@@ -1,9 +1,22 @@
 {% extends "plemiona/base.html" %}
 {% load custom_filters %}
-
+{% load static %}
 {% block content %}
 <h2>Kuźnia - Badania</h2>
+<link rel="stylesheet" href="{% static 'style.css' %}">
+{% if messages %}
+<div class="missing-resources">
+    {% for message in messages %}
+    <div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
 
+{% if missing_resources %}
+  <div class="missing-resources">
+    <strong>Brakuje:</strong> {{ missing_resources|join:", " }}
+  </div>
+{% endif %}
 <table>
   <thead>
     <tr>
@@ -13,6 +26,7 @@
       <th>Koszt gliny</th>
       <th>Koszt żelaza</th>
       <th>Czas badania</th>
+      <th>Akcja</th>
     </tr>
   </thead>
   <tbody>
@@ -32,6 +46,9 @@
       <td>{{ data.clay }}</td>
       <td>{{ data.iron }}</td>
       <td>{{ research_times|get_from_dict:unit }}</td>
+      <td>
+            <a href="{% url 'plemiona:start_research' village.id unit %}" class="btn btn-primary">Badaj</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
