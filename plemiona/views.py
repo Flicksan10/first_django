@@ -350,6 +350,11 @@ def recruit_units(request, village_id):
         village = Village.objects.get(id=village_id, user=request.user)
         research = village.research
 
+        tasks_count = RecruitmentOrder.objects.filter(village=village).count()
+        if tasks_count >= 15:
+            messages.error(request, "za duzo zadan w kolejce max 15, chyba, że zadania laczone")
+            return redirect('plemiona:barracks_view', village_id=village_id)
+
         total_wood_needed = 0
         total_clay_needed = 0
         total_iron_needed = 0
@@ -415,7 +420,7 @@ def create_recruit_unit_task(request,village,village_id):
             iron_needed = costs['iron'] * quantity
 
             unit_recruit_time = costs['recruit_time']
-            adjusted_recruit_time = unit_recruit_time * (barracks_performance / 100)
+            adjusted_recruit_time = unit_recruit_time * (barracks_performance / 2000)
             print(adjusted_recruit_time)
             single_unit_recruit_time = timezone.now() + timezone.timedelta(seconds=adjusted_recruit_time)
             is_active_order = not RecruitmentOrder.objects.filter(village=village, is_active=True).exists()

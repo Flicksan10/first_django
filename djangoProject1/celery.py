@@ -25,7 +25,7 @@ def debug_task(self):
 app.conf.beat_schedule = {
     'update-resources-every-10-seconds': {
         'task': 'plemiona.tasks.update_resources',
-        'schedule': 10.0,  # wykonuje się co 10 sekund
+        'schedule': 1.0,  # wykonuje się co 10 sekund
     },
     'check-building-tasks-every-second': {
         'task': 'plemiona.tasks.check_building_tasks',
@@ -36,7 +36,7 @@ app.conf.beat_schedule = {
         'schedule': 1.0,  # uruchamia co 1 sekundę
     },
     'check_research_tasks-tasks-every-second': {
-        'task': 'plemiona.tasks.check_research_tasks',
+        'task': 'plemiona.tasks.process_recruitment_orders',
         'schedule': 1.0,  # uruchamia co 1 sekundę
     },
     # 'process_recruitment_orders-tasks-every-second': {

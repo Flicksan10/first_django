@@ -184,7 +184,8 @@ def check_research_tasks():
 def process_recruitment_orders():
     with transaction.atomic():
         # Pobierz aktywne zamówienia, które są gotowe do przetworzenia
-        active_orders = RecruitmentOrder.objects.filter(is_active=True,unit_recruit_time__lte=timezone.now())
+        active_orders = RecruitmentOrder.objects.filter(is_active=True, single_unit_recruit_time__lte=timezone.now())
+        logging.info(active_orders)
         for order in active_orders:
             village = order.village
             barracks_performance = buildings_data_dict['barracks'][village.barracks]['performance']
@@ -197,22 +198,26 @@ def process_recruitment_orders():
                 army.save()
 
                 order.quantity -= 1
+                # when one order end next one must be started
                 if order.quantity == 0:
                     order.delete()
+                    next_order = RecruitmentOrder.objects.filter(village=village, is_active=False).order_by(
+                        'created_data').first()
+                    if next_order:
+                        next_order.is_active = True
+                        # Zaktualizuj czas rekrutacji dla następnego zamówienia
+                        next_unit_recruit_time = army_data[next_order.unit_type]['recruit_time']
+                        adjusted_next_recruit_time = next_unit_recruit_time * (barracks_performance / 2000)
+                        next_order.single_unit_recruit_time = timezone.now() + timezone.timedelta(
+                            seconds=adjusted_next_recruit_time)
+                        next_order.save()
                 else:
                     # Oblicz czas rekrutacji dla kolejnej jednostki
-                    unit_recruit_time = army_data[order.unit_type]['recruit_time'] *  ( barracks_performance/100)
+                    unit_recruit_time = army_data[order.unit_type]['recruit_time'] *  ( barracks_performance/2000)
                     # Ustaw czas rozpoczęcia kolejnej jednostki za kazdym razme ma byc sprawdzone kiedy zakonczy sie rekrutacja
                     order.single_unit_recruit_time = timezone.now() + timezone.timedelta(seconds=unit_recruit_time)
                     order.save()
 
             # chce aby było to najstarsze zadanie ma ono byc pobrane dopiero jesli zostanie usuniete poprzednie
-            next_order = RecruitmentOrder.objects.filter(village=village, is_active=False).order_by('created_data').first()
-            if next_order:
-                next_order.is_active = True
-                # Zaktualizuj czas rekrutacji dla następnego zamówienia
-                next_unit_recruit_time = army_data[next_order.unit_type]['recruit_time']
-                adjusted_next_recruit_time = next_unit_recruit_time * ( barracks_performance / 100 )
-                next_order.single_unit_recruit_time = timezone.now() + timezone.timedelta(seconds=adjusted_next_recruit_time)
-                next_order.save()
+
 

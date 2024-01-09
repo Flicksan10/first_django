@@ -222,7 +222,7 @@ class RecruitmentOrder(models.Model):
     village = models.ForeignKey(Village, on_delete=models.CASCADE)
     unit_type = models.CharField(max_length=100)
     quantity = models.IntegerField()
-    single_unit_recruit_time = models.IntegerField()  # Czas rekrutacji pojedynczej jednostki
+    single_unit_recruit_time = models.DateTimeField(default=timezone.now)  # Czas rekrutacji pojedynczej jednostki
     is_active = models.BooleanField(default=False)
     total_cost = models.JSONField()  # Całkowity koszt w formacie JSON
     created_data=  models.DateTimeField(default=timezone.now) # Szacowany czas rozpoczęcia rekrutacji
