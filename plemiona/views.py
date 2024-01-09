@@ -22,7 +22,7 @@ from .buildings_data.create_village_scripts import \
 from .buildings_data.inicialization_script import initialize_building_properties, create_resources_for_all_villages, \
     initialize_army_for_all_villages
 from .models import Topic_message, Notification, Answers_Message, Reports, BuildingProperties, VillageResources, \
-    BuildingTask, ArmyTask, Army, ResearchTask, Research
+    BuildingTask, ArmyTask, Army, ResearchTask, Research, RecruitmentOrder
 from .forms import MessageForm
 from .models import Village
 from django.urls import reverse_lazy
@@ -343,17 +343,18 @@ def barracks_view(request, village_id):
 
     return render(request, 'plemiona/barracks.html', context)
 
+
 @login_required
 def recruit_units(request, village_id):
     if request.method == 'POST':
         village = Village.objects.get(id=village_id, user=request.user)
-        army = village.army  # Pobierz obiekt Army powiązany z wioską
         research = village.research
 
         total_wood_needed = 0
         total_clay_needed = 0
         total_iron_needed = 0
 
+        # Oblicz całkowity koszt rekrutacji
         for unit, costs in army_data.items():
             quantity_key = f'quantity_{unit}'
             quantity = int(request.POST.get(quantity_key, 0))
@@ -361,6 +362,7 @@ def recruit_units(request, village_id):
                 if not getattr(research, unit, False):
                     messages.error(request, f"Jednostka {unit} nie została zbadana.")
                     return redirect('plemiona:barracks_view', village_id=village_id)
+
                 wood_needed = costs['wood'] * quantity
                 clay_needed = costs['clay'] * quantity
                 iron_needed = costs['iron'] * quantity
@@ -369,49 +371,65 @@ def recruit_units(request, village_id):
                 total_clay_needed += clay_needed
                 total_iron_needed += iron_needed
 
+        # Sprawdź, czy są dostępne zasoby
         if (village.resources.wood >= total_wood_needed and
-            village.resources.clay >= total_clay_needed and
-            village.resources.iron >= total_iron_needed):
-            for unit, costs in army_data.items():
-                quantity_key = f'quantity_{unit}'
-                quantity = int(request.POST.get(quantity_key, 0))
+                village.resources.clay >= total_clay_needed and
+                village.resources.iron >= total_iron_needed):
 
-                if quantity > 0:
-                    # Aktualizacja liczby jednostek w armii
-                    unit_inside_field = f'{unit}_inside'
-                    current_quantity = getattr(army, unit_inside_field, 0)
-                    setattr(army, unit_inside_field, current_quantity + quantity)
-
-            # Aktualizacja surowców w wiosce
+            # Odejmij zasoby
             village.resources.wood -= total_wood_needed
             village.resources.clay -= total_clay_needed
             village.resources.iron -= total_iron_needed
-
             village.resources.save()
-            army.save()  # Zapisz zmiany w armii
-            village.save()
 
-            # Możesz dodać komunikat o sukcesie rekrutacji
-            messages.success(request, 'Units recruited successfully.')
-                    # Przekierowanie po pomyślnej rekrutacji
-            return redirect('plemiona:barracks_view', village_id=village_id)
+            # start function if all conditions ale fulfilled
+            create_recruit_unit_task(request, village,village_id)
+
+
         else:
-                    # Przekieruj z powrotem do town_hall z komunikatem o braku zasobów
-                    missing_resources_units = []
-                    if village.resources.wood < total_wood_needed:
-                        missing_resources_units.append('drewno')
-                    if village.resources.clay < total_clay_needed:
-                        missing_resources_units.append('glina')
-                    if village.resources.iron < total_iron_needed:
-                        missing_resources_units.append('żelazo')
+            # Niewystarczające zasoby
+            missing_resources_units = []
+            if village.resources.wood < total_wood_needed:
+                missing_resources_units.append('drewno')
+            if village.resources.clay < total_clay_needed:
+                missing_resources_units.append('glina')
+            if village.resources.iron < total_iron_needed:
+                missing_resources_units.append('żelazo')
 
-                    if missing_resources_units:
-                        request.session['missing_resources_units'] = missing_resources_units
-                        return redirect('plemiona:barracks_view', village_id=village_id)
+            if missing_resources_units:
+                request.session['missing_resources_units'] = missing_resources_units
+                return redirect('plemiona:barracks_view', village_id=village_id)
+
+    return redirect('plemiona:barracks_view', village_id=village_id)
 
 
-            # Przekierowanie do formularza rekrutacji w przypadku żądania innego niż POST
-        return redirect('plemiona:barracks_view', village_id=village_id)
+def create_recruit_unit_task(request,village,village_id):
+    barracks_performance = buildings_data_dict['barracks'][village.barracks]['performance']
+    for unit, costs in army_data.items():
+        quantity_key = f'quantity_{unit}'
+        quantity = int(request.POST.get(quantity_key, 0))
+        if quantity > 0:
+
+            wood_needed = costs['wood'] * quantity
+            clay_needed = costs['clay'] * quantity
+            iron_needed = costs['iron'] * quantity
+
+            unit_recruit_time = costs['recruit_time']
+            adjusted_recruit_time = unit_recruit_time * (barracks_performance / 100)
+            print(adjusted_recruit_time)
+            single_unit_recruit_time = timezone.now() + timezone.timedelta(seconds=adjusted_recruit_time)
+            is_active_order = not RecruitmentOrder.objects.filter(village=village, is_active=True).exists()
+            RecruitmentOrder.objects.create(
+                village=village,
+                unit_type=unit,
+                quantity=quantity,
+                single_unit_recruit_time=single_unit_recruit_time,
+                is_active=is_active_order,
+                total_cost={'wood': wood_needed, 'clay': clay_needed, 'iron': iron_needed}
+            )
+
+    messages.success(request, 'Units recruitment orders created successfully.')
+    return redirect('plemiona:barracks_view', village_id=village_id)
 
 
 def place_view(request, village_id):

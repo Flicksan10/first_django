@@ -39,5 +39,9 @@ app.conf.beat_schedule = {
         'task': 'plemiona.tasks.check_research_tasks',
         'schedule': 1.0,  # uruchamia co 1 sekundę
     },
+    # 'process_recruitment_orders-tasks-every-second': {
+    #     'task': 'plemiona.tasks.process_recruitment_orders',
+    #     'schedule': 1.0,  # uruchamia co 1 sekundę
+    # },
 
 }
